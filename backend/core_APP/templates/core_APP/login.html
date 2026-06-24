@@ -1,0 +1,36 @@
+{% extends "core_APP/base.html" %}
+{% block title %}Log In · MC-Manager{% endblock %}
+
+{% block body %}
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <h1>MC-Manager</h1>
+
+        {% if messages %}
+        <ul class="messages">
+            {% for msg in messages %}
+            <li class="{{ msg.tags }}">{{ msg }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" autocomplete="username" required autofocus>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" autocomplete="current-password" required>
+
+            <div class="remember-row">
+                <input type="checkbox" id="remember" name="remember" value="1">
+                <label for="remember" style="margin:0;text-transform:none;font-weight:400;font-size:13px;color:#555;">Remember me</label>
+            </div>
+
+            <button type="submit">Log In</button>
+        </form>
+
+        <span class="alt-link">No account? <a href="{% url 'signup' %}">Sign up</a></span>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "core_APP/base.html" %}
+{% block title %}Add Server · MC-Manager{% endblock %}
+
+{% block body %}
+<nav class="navbar">
+    <span class="brand">MC-Manager</span>
+    <ul class="nav-links">
+        <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li><a href="{% url 'add_server' %}" class="active">Add Server</a></li>
+        <li><a href="{% url 'settings' %}">Settings</a></li>
+    </ul>
+    <div class="spacer"></div>
+    <div class="nav-user">
+        <span>{{ request.user.username }}</span>
+        <form method="post" action="{% url 'logout' %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit">Log Out</button>
+        </form>
+    </div>
+</nav>
+
+<div class="page">
+    {% if messages %}
+    <ul class="messages">
+        {% for msg in messages %}
+        <li class="{{ msg.tags }}">{{ msg }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <h2>Add Server</h2>
+
+    <div class="form-card">
+        <form method="post">
+            {% csrf_token %}
+
+            <label for="name">Server Name</label>
+            <input type="text" id="name" name="name" placeholder="e.g. Survival SMP" required autofocus>
+
+            <label for="mc_version">Minecraft Version</label>
+            <input type="text" id="mc_version" name="mc_version" placeholder="e.g. 1.21.11" required>
+
+            <label for="mod_loader">Mod Loader</label>
+            <select id="mod_loader" name="mod_loader">
+                {% for value, display in loader_choices %}
+                <option value="{{ value }}">{{ display }}</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit">Create Server</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

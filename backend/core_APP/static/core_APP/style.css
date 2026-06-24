@@ -1,0 +1,309 @@
+/* ── MC-Manager · Old-School Minimal CSS ──────────────────────────────────── */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f0f0;
+    color: #222;
+    line-height: 1.5;
+}
+
+a {
+    color: #1a5276;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+/* ── Auth card (login / signup) ──────────────────────────────────────────── */
+
+.auth-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.auth-card {
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 32px 36px;
+    width: 340px;
+}
+
+.auth-card h1 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-align: center;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.auth-card label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #555;
+}
+
+.auth-card input[type="text"],
+.auth-card input[type="password"] {
+    width: 100%;
+    padding: 8px 10px;
+    margin-bottom: 16px;
+    border: 1px solid #bbb;
+    background: #fafafa;
+    font-size: 14px;
+    font-family: inherit;
+}
+.auth-card input:focus {
+    outline: 2px solid #555;
+    outline-offset: -2px;
+}
+
+.auth-card .remember-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 18px;
+    font-size: 13px;
+    color: #555;
+}
+
+.auth-card button {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #222;
+    background: #222;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    font-family: inherit;
+}
+.auth-card button:hover {
+    background: #444;
+}
+
+.auth-card .alt-link {
+    display: block;
+    margin-top: 16px;
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+}
+
+/* ── Flash messages ──────────────────────────────────────────────────────── */
+
+.messages {
+    list-style: none;
+    margin-bottom: 14px;
+}
+.messages li {
+    padding: 8px 10px;
+    font-size: 13px;
+    border: 1px solid #bbb;
+    margin-bottom: 6px;
+}
+.messages li.error {
+    background: #fdecea;
+    border-color: #d9534f;
+    color: #a94442;
+}
+.messages li.success {
+    background: #eaf6ec;
+    border-color: #5cb85c;
+    color: #3c763d;
+}
+
+/* ── Navbar ──────────────────────────────────────────────────────────────── */
+
+.navbar {
+    background: #222;
+    color: #eee;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    height: 48px;
+    font-size: 13px;
+}
+
+.navbar .brand {
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-right: 32px;
+    color: #fff;
+}
+
+.navbar .nav-links {
+    display: flex;
+    gap: 20px;
+    list-style: none;
+}
+.navbar .nav-links a {
+    color: #ccc;
+    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+.navbar .nav-links a:hover,
+.navbar .nav-links a.active {
+    color: #fff;
+    text-decoration: none;
+}
+
+.navbar .spacer {
+    flex: 1;
+}
+
+.navbar .nav-user {
+    font-size: 12px;
+    color: #aaa;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.navbar .nav-user button {
+    background: none;
+    border: 1px solid #666;
+    color: #ccc;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    font-family: inherit;
+}
+.navbar .nav-user button:hover {
+    border-color: #fff;
+    color: #fff;
+}
+
+/* ── Page container ──────────────────────────────────────────────────────── */
+
+.page {
+    max-width: 800px;
+    margin: 32px auto;
+    padding: 0 20px;
+}
+
+.page h2 {
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 8px;
+}
+
+/* ── Server table ────────────────────────────────────────────────────────── */
+
+.server-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+.server-table th,
+.server-table td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid #ddd;
+}
+.server-table th {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #666;
+    background: #e8e8e8;
+}
+.server-table tr:hover td {
+    background: #f7f7f7;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #888;
+    font-size: 14px;
+}
+.empty-state a {
+    font-weight: 600;
+}
+
+/* ── Forms (settings, add-server) ────────────────────────────────────────── */
+
+.form-card {
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 24px 28px;
+}
+
+.form-card label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #555;
+    margin-bottom: 4px;
+}
+
+.form-card input[type="text"],
+.form-card select {
+    width: 100%;
+    padding: 8px 10px;
+    margin-bottom: 18px;
+    border: 1px solid #bbb;
+    background: #fafafa;
+    font-size: 14px;
+    font-family: inherit;
+}
+.form-card input:focus,
+.form-card select:focus {
+    outline: 2px solid #555;
+    outline-offset: -2px;
+}
+
+.form-card button {
+    padding: 10px 24px;
+    border: 1px solid #222;
+    background: #222;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    font-family: inherit;
+}
+.form-card button:hover {
+    background: #444;
+}
+
+.form-card .current-value {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 18px;
+    padding: 8px 10px;
+    background: #eee;
+    border: 1px solid #ccc;
+    word-break: break-all;
+}

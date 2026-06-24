@@ -1,0 +1,93 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv/
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+media/
+
+# Static files (if collected)
+staticfiles/
+
+# Environment Variables
+.env
+.env.*
+!.env.example
+
+# Secrets
+secrets.json
+
+backend/core_APP/migrations/*.py
+!backend/core_APP/migrations/__init__.py
+backend/core_APP/migrations/*.pyc
+
+# IDEs
+.vscode/
+.idea/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+coverage.xml
+
+# Type Checkers
+.mypy_cache/
+.pyre/
+.pytype/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Build / Distribution
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Celery
+celerybeat-schedule
+
+# Logs
+logs/
+*.log
+
+# Cache
+.cache/
+
+# Docker
+*.pid
+
+# Node.js (if using frontend tooling)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Terraform (if applicable)
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# Backup files
+*.bak
+*.swp
+*.swo
+
+# Local settings
+local_settings.py

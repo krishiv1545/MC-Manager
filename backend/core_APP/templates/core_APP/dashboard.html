@@ -1,0 +1,60 @@
+{% extends "core_APP/base.html" %}
+{% block title %}Dashboard · MC-Manager{% endblock %}
+
+{% block body %}
+<nav class="navbar">
+    <span class="brand">MC-Manager</span>
+    <ul class="nav-links">
+        <li><a href="{% url 'dashboard' %}" class="active">Dashboard</a></li>
+        <li><a href="{% url 'add_server' %}">Add Server</a></li>
+        <li><a href="{% url 'settings' %}">Settings</a></li>
+    </ul>
+    <div class="spacer"></div>
+    <div class="nav-user">
+        <span>{{ request.user.username }}</span>
+        <form method="post" action="{% url 'logout' %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit">Log Out</button>
+        </form>
+    </div>
+</nav>
+
+<div class="page">
+    {% if messages %}
+    <ul class="messages">
+        {% for msg in messages %}
+        <li class="{{ msg.tags }}">{{ msg }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <h2>Your Servers</h2>
+
+    {% if servers %}
+    <table class="server-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Version</th>
+                <th>Mod Loader</th>
+                <th>Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in servers %}
+            <tr>
+                <td>{{ s.name }}</td>
+                <td>{{ s.mc_version }}</td>
+                <td>{{ s.get_mod_loader_display }}</td>
+                <td>{{ s.created_at|date:"M d, Y" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        No servers yet. <a href="{% url 'add_server' %}">Add your first server →</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
