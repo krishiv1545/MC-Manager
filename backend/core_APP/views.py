@@ -3,10 +3,18 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.shortcuts import get_object_or_404
 
 from .models import UserSettings, MinecraftServer
 
 import uuid
+import subprocess
+
+from .services.server_creator import create_server_on_disk
+from .services.server_paths import get_server_path
+from .services.server_creator import get_next_port
 
 # ── Auth views ───────────────────────────────────────────────────────────────
 
@@ -99,10 +107,6 @@ def add_server_view(request):
         if not name or not mc_version:
             messages.error(request, 'Server name and version are required.')
         else:
-            from .services.server_creator import create_server_on_disk
-            from .services.server_paths import get_server_path
-            from .services.server_creator import get_next_port
-
             server_uuid = uuid.uuid4()
             server_path = get_server_path(request.user.settings, server_uuid)
 
@@ -129,3 +133,100 @@ def add_server_view(request):
 
     loader_choices = MinecraftServer.MOD_LOADER_CHOICES
     return render(request, 'core_APP/add_server.html', {'loader_choices': loader_choices})
+
+
+@require_POST
+@login_required
+def start_server_view(request, server_id):
+    server = get_object_or_404(
+        MinecraftServer,
+        id=server_id,
+        owner=request.user,
+    )
+
+    server_path = get_server_path(request.user.settings, server.server_uuid)
+
+    try:
+        subprocess.run(
+            ["docker", "compose", "up", "-d"],
+            cwd=server_path,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+        server.status = "running"
+        server.save()
+
+        messages.success(request, f"{server.name} started.")
+
+    except subprocess.CalledProcessError as e:
+        server.status = "error"
+        server.save()
+
+        messages.error(request, e.stderr)
+
+    return redirect("dashboard")
+
+
+@require_POST
+@login_required
+def stop_server_view(request, server_id):
+    server = get_object_or_404(
+        MinecraftServer,
+        id=server_id,
+        owner=request.user,
+    )
+
+    server_path = get_server_path(request.user.settings, server.server_uuid)
+
+    try:
+        subprocess.run(
+            ["docker", "compose", "down"],
+            cwd=server_path,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+        server.status = "stopped"
+        server.save()
+
+        messages.success(request, f"{server.name} stopped.")
+
+    except subprocess.CalledProcessError as e:
+        server.status = "error"
+        server.save()
+
+        messages.error(request, e.stderr)
+
+    return redirect("dashboard")
+
+
+@login_required
+def edit_server_view(request, server_id):
+    """View and edit a specific server's settings."""
+    server = get_object_or_404(
+        MinecraftServer,
+        id=server_id,
+        owner=request.user,
+    )
+
+    # if request.method == 'POST':
+    #     name = request.POST.get('name', '').strip()
+    #     mc_version = request.POST.get('mc_version', '').strip()
+    #     mod_loader = request.POST.get('mod_loader', 'vanilla')
+
+    #     if not name or not mc_version:
+    #         messages.error(request, 'Server name and version are required.')
+    #     else:
+    #         server.name = name
+    #         server.mc_version = mc_version
+    #         server.mod_loader = mod_loader
+    #         server.save()
+    #         messages.success(request, f'Server "{name}" updated.')
+    #         return redirect('dashboard')
+
+    return render(request, 'core_APP/edit_server.html', {
+        'server': server,
+    })

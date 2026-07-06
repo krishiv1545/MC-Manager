@@ -51,11 +51,23 @@
                 <td>{{ s.mc_version }}</td>
                 <td>{{ s.get_mod_loader_display }}</td>
                 <td>{{ s.created_at|date:"M d, Y" }}</td>
-                <td>{{ s.get_status_display }}</td>
-                <td>
-                    <button class="play-btn">
-                        <span class="play-icon"></span>
-                    </button>
+                <td class="server-status">{{ s.get_status_display }}</td>
+                <td class="action-buttons">
+                    <form method="post" action="{% url 'start_server' s.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="play-btn {% if s.status == 'running' %}disabled-btn{% endif %}">
+                            <span class="play-icon"></span>
+                        </button>
+                    </form>
+
+                    <form method="post" action="{% url 'stop_server' s.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="stop-btn {% if s.status != 'running' %}disabled-btn{% endif %}">
+                            <span class="stop-icon"></span>
+                        </button>
+                    </form>
+
+                    <a href="{% url 'edit_server' s.id %}">Server Settings</a>
                 </td>
             </tr>
             {% endfor %}

@@ -308,10 +308,16 @@ a:hover {
     word-break: break-all;
 }
 
+.action-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+}
+
 .play-btn {
-    /* min-width: 30px;
-    min-height: 30px; */
-    padding: 8px;
+    min-width: 35px;
+    min-height: 35px;
     border: none;
     border-radius: 100%;
     background: #22c55e;
@@ -339,4 +345,52 @@ a:hover {
     border-bottom: 9px solid transparent;
     border-left: 15px solid white;
     margin-left: 3px; /* visually centers the triangle */
+}
+
+.stop-btn {
+    min-width: 35px;
+    min-height: 35px;
+    border: none;
+    border-radius: 100%;
+    background: #c52222;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transition: 0.2s ease;
+}
+
+.stop-btn:hover {
+    background: #a31616;
+}
+
+.stop-btn:active {
+    transform: scale(0.96);
+}
+
+.stop-icon {
+    width: 15px;
+    height: 15px;
+    background-color: white;
+}
+
+.disabled-btn {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.disabled-btn::after {
+    content: "";
+    position: absolute;
+    top: -2px;
+    bottom: -2px;
+    left: 50%;
+    width: 3px;
+    background: #000;
+    transform: translateX(-50%) rotate(45deg);
+    border-radius: 2px;
 }
