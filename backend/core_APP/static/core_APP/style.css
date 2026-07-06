@@ -198,7 +198,7 @@ a:hover {
 /* ── Page container ──────────────────────────────────────────────────────── */
 
 .page {
-    max-width: 800px;
+    max-width: 1000px;
     margin: 32px auto;
     padding: 0 20px;
 }
@@ -306,4 +306,37 @@ a:hover {
     background: #eee;
     border: 1px solid #ccc;
     word-break: break-all;
+}
+
+.play-btn {
+    /* min-width: 30px;
+    min-height: 30px; */
+    padding: 8px;
+    border: none;
+    border-radius: 100%;
+    background: #22c55e;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transition: 0.2s ease;
+}
+
+.play-btn:hover {
+    background: #16a34a;
+}
+
+.play-btn:active {
+    transform: scale(0.96);
+}
+
+.play-icon {
+    width: 0;
+    height: 0;
+    border-top: 9px solid transparent;
+    border-bottom: 9px solid transparent;
+    border-left: 15px solid white;
+    margin-left: 3px; /* visually centers the triangle */
 }

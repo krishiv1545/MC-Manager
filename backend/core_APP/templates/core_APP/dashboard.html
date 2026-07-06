@@ -34,19 +34,29 @@
     <table class="server-table">
         <thead>
             <tr>
+                <th>UUID</th>
                 <th>Name</th>
                 <th>Version</th>
                 <th>Mod Loader</th>
                 <th>Created</th>
+                <th>Status</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
             {% for s in servers %}
             <tr>
+                <td>{{ s.server_uuid }}</td>
                 <td>{{ s.name }}</td>
                 <td>{{ s.mc_version }}</td>
                 <td>{{ s.get_mod_loader_display }}</td>
                 <td>{{ s.created_at|date:"M d, Y" }}</td>
+                <td>{{ s.get_status_display }}</td>
+                <td>
+                    <button class="play-btn">
+                        <span class="play-icon"></span>
+                    </button>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

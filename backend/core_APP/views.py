@@ -6,6 +6,7 @@ from django.contrib import messages
 
 from .models import UserSettings, MinecraftServer
 
+import uuid
 
 # ── Auth views ───────────────────────────────────────────────────────────────
 
@@ -98,13 +99,32 @@ def add_server_view(request):
         if not name or not mc_version:
             messages.error(request, 'Server name and version are required.')
         else:
-            MinecraftServer.objects.create(
+            from .services.server_creator import create_server_on_disk
+            from .services.server_paths import get_server_path
+            from .services.server_creator import get_next_port
+
+            server_uuid = uuid.uuid4()
+            server_path = get_server_path(request.user.settings, server_uuid)
+
+            server = MinecraftServer.objects.create(
                 name=name,
                 mc_version=mc_version,
                 mod_loader=mod_loader,
                 owner=request.user,
+                server_uuid=server_uuid,
+                server_path=str(server_path),
+                port=get_next_port(),
+                status='created',
             )
-            messages.success(request, f'Server "{name}" created.')
+
+            success, message = create_server_on_disk(server, server_path)
+            if not success:
+                server.delete()  # Rollback if creation failed
+                messages.error(request, message)
+            else:
+                server.save()
+                messages.success(request, f'Server "{name}" created.')
+            
             return redirect('dashboard')
 
     loader_choices = MinecraftServer.MOD_LOADER_CHOICES

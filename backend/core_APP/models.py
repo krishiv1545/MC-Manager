@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 import os
+import uuid
 
 
 class UserSettings(models.Model):
@@ -39,6 +40,34 @@ class MinecraftServer(models.Model):
     mod_loader = models.CharField(max_length=20, choices=MOD_LOADER_CHOICES, default='vanilla')
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='servers')
     created_at = models.DateTimeField(auto_now_add=True)
+
+    STATUS_CHOICES = [
+        ("created", "Created"),
+        ("running", "Running"),
+        ("stopped", "Stopped"),
+        ("starting", "Starting"),
+        ("stopping", "Stopping"),
+        ("error", "Error"),
+    ]
+    server_uuid = models.UUIDField(
+        unique=True,
+        editable=False,
+        default=uuid.uuid4,
+    )
+    server_path = models.CharField(
+        max_length=1000,
+        blank=True,
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="created",
+    )
+    port = models.PositiveIntegerField(
+        unique=True,
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         ordering = ['-created_at']
