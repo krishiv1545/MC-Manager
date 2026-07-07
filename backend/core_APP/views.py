@@ -1,3 +1,5 @@
+from pprint import pprint
+
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -11,6 +13,7 @@ from .models import UserSettings, MinecraftServer
 
 import uuid
 import subprocess
+import nbtlib
 
 from .services.server_creator import create_server_on_disk
 from .services.server_paths import get_server_path
@@ -247,4 +250,134 @@ def edit_server_view(request, server_id):
     return render(request, 'core_APP/edit_server.html', {
         'server': server,
         'properties': properties,
+    })
+
+
+@login_required
+def playerdata_view(request, server_id):
+    """View player data for a specific server."""
+
+    server = get_object_or_404(
+        MinecraftServer,
+        id=server_id,
+        owner=request.user,
+    )
+
+    playerdata_path = get_server_path(request.user.settings, server.server_uuid) / "data" / "world" / "playerdata"
+
+    players = []
+
+    if playerdata_path.exists():
+        for file in playerdata_path.glob("*.dat"):
+
+            nbt = nbtlib.load(file).unpack()
+
+            inventory = [None] * 36
+
+            for item in nbt.get("Inventory", []):
+                slot = item["Slot"]
+
+                # Ignore armor/offhand for now
+                if 0 <= slot < 36:
+                    inventory[slot] = {
+                        "slot": slot,
+                        "id": item["id"],
+                        "name": item["id"].replace("minecraft:", "").replace("_", " ").title(),
+                        "texture": item["id"].replace("minecraft:", "") + ".png",
+                        "count": item["count"],
+                    }
+
+            ender = [None] * 27
+
+            for i, item in enumerate(nbt.get("EnderItems", [])):
+                if i < 27:
+                    ender[i] = {
+                        "id": item["id"],
+                        "name": item["id"].replace("minecraft:", "").replace("_", " ").title(),
+                        "texture": item["id"].replace("minecraft:", "") + ".png",
+                        "count": item["count"],
+                    }
+
+            abilities = nbt.get("abilities", {})
+
+            attributes = [
+                {
+                    "id": a["id"].replace("minecraft:", ""),
+                    "base": a["base"],
+                }
+                for a in nbt.get("attributes", [])
+            ]
+
+            players.append({
+                "uuid": file.stem,
+                "name": file.stem,          # Replace later with username lookup
+                "health": nbt.get("Health", 20),
+                "food": nbt.get("foodLevel", 20),
+                "xp_level": nbt.get("XpLevel", 0),
+                "xp_total": nbt.get("XpTotal", 0),
+                "xp_progress": nbt.get("XpP", 0),
+
+                "gamemode": {
+                    0: "Survival",
+                    1: "Creative",
+                    2: "Adventure",
+                    3: "Spectator",
+                }.get(nbt.get("playerGameType", 0), "Unknown"),
+
+                "dimension": nbt.get("Dimension"),
+                "pos": nbt.get("Pos", [0, 0, 0]),
+                "rotation": nbt.get("Rotation", [0, 0]),
+
+                "spawn_dimension": nbt.get("SpawnDimension"),
+                "spawn_x": nbt.get("SpawnX"),
+                "spawn_y": nbt.get("SpawnY"),
+                "spawn_z": nbt.get("SpawnZ"),
+                "spawn_angle": nbt.get("SpawnAngle"),
+
+                "on_ground": bool(nbt.get("OnGround", 0)),
+                "air": nbt.get("Air"),
+                "fire": nbt.get("Fire"),
+                "fall_distance": nbt.get("FallDistance"),
+                "portal_cooldown": nbt.get("PortalCooldown"),
+
+                "flying": bool(abilities.get("flying", 0)),
+                "invulnerable": bool(abilities.get("invulnerable", 0)),
+                "mayfly": bool(abilities.get("mayfly", 0)),
+
+                "food_saturation": nbt.get("foodSaturationLevel"),
+                "food_exhaustion": nbt.get("foodExhaustionLevel"),
+
+                "score": nbt.get("Score"),
+                "seen_credits": bool(nbt.get("seenCredits", 0)),
+                "motion": nbt.get("Motion"),
+
+                "attributes": attributes,
+
+                "selected_slot": nbt.get("SelectedItemSlot", 0),
+
+                "inventory": inventory,
+                "ender": ender,
+
+                "data_version": nbt.get("DataVersion"),
+            })
+
+    selected_uuid = request.GET.get("player")
+
+    selected_player = None
+
+    if players:
+        if selected_uuid:
+            selected_player = next(
+                (p for p in players if p["uuid"] == selected_uuid),
+                players[0]
+            )
+        else:
+            selected_player = players[0]
+
+    return render(request, "core_APP/playerdata.html", {
+        "server": server,
+        "players": players,
+        "selected_player": selected_player,
+        "inventory_slots": (selected_player["inventory"][9:] + selected_player["inventory"][:9]) if selected_player else [],
+        "ender_slots": selected_player["ender"] if selected_player else [],
     })

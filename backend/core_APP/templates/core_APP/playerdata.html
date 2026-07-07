@@ -1,0 +1,368 @@
+{% extends "core_APP/base.html" %}
+{% load static %}
+
+{% block title %}Playerdata ({{ server.name }}){% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'core_APP/playerdata.css' %}">
+{% endblock %}
+
+{% block body %}
+
+<nav class="navbar">
+    <span class="brand">MC-Manager</span>
+
+    <ul class="nav-links">
+        <li><a href="{% url 'dashboard' %}" class="active">Dashboard</a></li>
+        <li><a href="{% url 'add_server' %}">Add Server</a></li>
+        <li><a href="{% url 'settings' %}">Settings</a></li>
+    </ul>
+
+    <div class="spacer"></div>
+
+    <div class="nav-user">
+        <span>{{ request.user.username }}</span>
+
+        <form method="post" action="{% url 'logout' %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit">Log Out</button>
+        </form>
+    </div>
+</nav>
+
+<div class="page">
+
+    {% if messages %}
+    <ul class="messages">
+        {% for msg in messages %}
+        <li class="{{ msg.tags }}">{{ msg }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <h2>
+        Playerdata for
+        <span class="server-name">{{ server.name }}</span>
+    </h2>
+
+    <div class="player-layout">
+        <aside class="player-sidebar">
+            <h3>Players</h3>
+
+            <div class="player-list">
+                {% for player in players %}
+                <a class="player-card {% if player.selected %}active{% endif %}"
+                   href="?player={{ player.uuid }}">
+                    <div class="player-name">
+                        {{ player.name }}
+                    </div>
+                </a>
+
+                {% empty %}
+
+                <div class="empty-player">
+                    No player data found.
+                </div>
+
+                {% endfor %}
+            </div>
+        </aside>
+
+        <main class="player-content">
+            {% if selected_player %}
+            <section class="panel">
+                <b>UUID:</b>&nbsp;&nbsp;{{ selected_player.uuid }}
+            </section>
+
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Health</div>
+                    <div class="stat-value">
+                        {{ selected_player.health|floatformat:1 }}/20
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Hunger</div>
+                    <div class="stat-value">
+                        {{ selected_player.food }}/20
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">XP Level</div>
+                    <div class="stat-value">
+                        {{ selected_player.xp_level }}
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Gamemode</div>
+                    <div class="stat-value">
+                        {{ selected_player.gamemode }}
+                    </div>
+                </div>
+            </section>
+
+            <div class="info-grid">
+                <section class="panel">
+                    <h3>Current Location</h3>
+                    <table class="info-table">
+                        <tr>
+                            <th>Dimension</th>
+                            <td>{{ selected_player.dimension }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>X</th>
+                            <td>{{ selected_player.pos.0|floatformat:2 }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Y</th>
+                            <td>{{ selected_player.pos.1|floatformat:2 }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Z</th>
+                            <td>{{ selected_player.pos.2|floatformat:2 }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Yaw</th>
+                            <td>{{ selected_player.rotation.0|floatformat:2 }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Pitch</th>
+                            <td>{{ selected_player.rotation.1|floatformat:2 }}</td>
+                        </tr>
+                    </table>
+                </section>
+
+                <section class="panel">
+                    <h3>Spawn Point</h3>
+                    <table class="info-table">
+                        <tr>
+                            <th>Dimension</th>
+                            <td>{{ selected_player.spawn_dimension }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>X</th>
+                            <td>{{ selected_player.spawn_x }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Y</th>
+                            <td>{{ selected_player.spawn_y }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Z</th>
+                            <td>{{ selected_player.spawn_z }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Angle</th>
+                            <td>{{ selected_player.spawn_angle|floatformat:2 }}</td>
+                        </tr>
+                    </table>
+                </section>
+
+                <section class="panel">
+                    <h3>Status</h3>
+                    <table class="info-table">
+                        <tr>
+                            <th>On Ground</th>
+                            <td>{{ selected_player.on_ground }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Flying</th>
+                            <td>{{ selected_player.flying }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Invulnerable</th>
+                            <td>{{ selected_player.invulnerable }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Air</th>
+                            <td>{{ selected_player.air }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Fire</th>
+                            <td>{{ selected_player.fire }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Fall Distance</th>
+                            <td>{{ selected_player.fall_distance }}</td>
+                        </tr>
+                    </table>
+                </section>
+
+                <section class="panel">
+                    <h3>Attributes</h3>
+                    <table class="info-table">
+                        {% for attr in selected_player.attributes %}
+                        <tr>
+                            <th>{{ attr.id }}</th>
+                            <td>{{ attr.base }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </section>
+            </div>
+
+            <section class="panel">
+                <div class="section-header">
+                    <h3>Inventory</h3>
+                    <span class="section-subtitle">
+                        {{ selected_player.inventory|length }} item{{ selected_player.inventory|length|pluralize }}
+                    </span>
+                </div>
+
+                <div class="inventory-grid">
+                    {% for slot in inventory_slots %}
+                        {% if slot %}
+                        <div class="inventory-slot {% if slot.slot == selected_player.selected_slot %}selected{% endif %}">
+                            <div class="slot-icon">
+                                <img
+                                    src="{% static 'core_APP/items/' %}{{ slot.texture }}"
+                                    alt="{{ slot.name }}"
+                                    loading="lazy">
+                            </div>
+
+                            {% if slot.count > 0 %}
+                                <span class="slot-count">
+                                    {{ slot.count }}
+                                </span>
+                            {% endif %}
+
+                            <div class="slot-tooltip">
+                                <strong>{{ slot.name }}</strong>
+                                <small>
+                                    {{ slot.id }}
+                                </small>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="inventory-slot empty"></div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="section-header">
+                    <h3>Ender Chest</h3>
+                </div>
+                <div class="inventory-grid ender-grid">
+                    {% for slot in ender_slots %}
+                        {% if slot %}
+                        <div class="inventory-slot">
+                            <div class="slot-icon">
+                                <img
+                                    src="{% static 'core_APP/items/' %}{{ slot.texture }}"
+                                    alt="{{ slot.name }}">
+                            </div>
+
+                            {% if slot.count > 1 %}
+                                <span class="slot-count">
+                                    {{ slot.count }}
+                                </span>
+                            {% endif %}
+
+                            <div class="slot-tooltip">
+                                <strong>{{ slot.name }}</strong>
+                                <small>
+                                    {{ slot.id }}
+                                </small>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="inventory-slot empty"></div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </section>
+
+            <details class="technical-panel">
+                <summary>
+                    Technical Details
+                </summary>
+
+                <div class="technical-content">
+                    <table class="technical-table">
+                        <tr>
+                            <th>Score</th>
+                            <td>{{ selected_player.score }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Seen Credits</th>
+                            <td>{{ selected_player.seen_credits }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>XP Total</th>
+                            <td>{{ selected_player.xp_total }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>XP Progress</th>
+                            <td>{{ selected_player.xp_progress }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Food Saturation</th>
+                            <td>{{ selected_player.food_saturation }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Food Exhaustion</th>
+                            <td>{{ selected_player.food_exhaustion }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Motion</th>
+                            <td>
+                                {{ selected_player.motion.0 }},
+                                {{ selected_player.motion.1 }},
+                                {{ selected_player.motion.2 }}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Portal Cooldown</th>
+                            <td>{{ selected_player.portal_cooldown }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Data Version</th>
+                            <td>{{ selected_player.data_version }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>UUID</th>
+                            <td>{{ selected_player.uuid }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </details>
+            {% else %}
+            <section class="panel empty-state">
+                <h3>No Player Selected</h3>
+                <p>
+                    No player data could be found for this server.
+                </p>
+            </section>
+            {% endif %}
+        </main>
+    </div>
+</div>
+{% endblock %}
