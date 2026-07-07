@@ -1,0 +1,62 @@
+{% extends "core_APP/base.html" %}
+{% block title %}Edit Server ({{ server.name }}){% endblock %}
+
+{% block body %}
+<nav class="navbar">
+    <span class="brand">MC-Manager</span>
+    <ul class="nav-links">
+        <li><a href="{% url 'dashboard' %}" class="active">Dashboard</a></li>
+        <li><a href="{% url 'add_server' %}">Add Server</a></li>
+        <li><a href="{% url 'settings' %}">Settings</a></li>
+    </ul>
+    <div class="spacer"></div>
+    <div class="nav-user">
+        <span>{{ request.user.username }}</span>
+        <form method="post" action="{% url 'logout' %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit">Log Out</button>
+        </form>
+    </div>
+</nav>
+
+<form method="post" action="{% url 'edit_server' server.id %}">
+<div class="page" style="padding-bottom: 100px;">
+    {% if messages %}
+    <ul class="messages">
+        {% for msg in messages %}
+        <li class="{{ msg.tags }}">{{ msg }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <h2>Edit Server Settings for <span class="server-name">{{ server.name }}</span></h2>
+
+    {% if properties %}
+        
+            {% csrf_token %}
+            {% for key, value in properties.items %}
+                <div class="property">
+                    <label class="property-label" for="{{ key }}">{{ key }}</label>
+                    <br/>
+                    <div class="property-input-container">
+                        <input class="property-input" type="text" id="{{ key }}" name="{{ key }}" value="{{ value }}">
+                        {% if key == 'difficulty' %}
+                            <p class="property-helptext">Values can be "peaceful", "easy", "normal" and "hard".</p>
+                        {% elif key == 'online-mode' %}
+                            <p class="property-helptext">Set "true" to allow cracked clients to connect.</p>
+                        {% elif key == 'gamemode' %}
+                            <p class="property-helptext">Values can be "survival", "creative" and "adventure".</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+            
+    {% else %}
+        <p>No server properties found.</p>
+    {% endif %}
+</div>
+<div class="submit-footer">
+    <button type="submit" class="save-btn">Save Changes</button>
+</div>
+</form>
+{% endblock %}

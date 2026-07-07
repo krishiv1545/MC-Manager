@@ -212,21 +212,39 @@ def edit_server_view(request, server_id):
         owner=request.user,
     )
 
-    # if request.method == 'POST':
-    #     name = request.POST.get('name', '').strip()
-    #     mc_version = request.POST.get('mc_version', '').strip()
-    #     mod_loader = request.POST.get('mod_loader', 'vanilla')
+    server_properties_path = get_server_path(request.user.settings, server.server_uuid) / "data" / "server.properties"
+    print(server_properties_path)
 
-    #     if not name or not mc_version:
-    #         messages.error(request, 'Server name and version are required.')
-    #     else:
-    #         server.name = name
-    #         server.mc_version = mc_version
-    #         server.mod_loader = mod_loader
-    #         server.save()
-    #         messages.success(request, f'Server "{name}" updated.')
-    #         return redirect('dashboard')
+    properties = {}
+
+    # Read Server Properties
+    if server_properties_path.exists():
+        with open(server_properties_path, 'r') as f:
+            for line in f:
+                if '=' in line:
+                    key, value = line.strip().split('=', 1)
+                    properties[key] = value
+
+    if request.method == "POST":
+        lines = []
+        with open(server_properties_path, "r") as f:
+            for line in f:
+                if "=" in line and not line.lstrip().startswith("#"):
+                    key, _ = line.rstrip("\n").split("=", 1)
+
+                    if key in request.POST:
+                        value = request.POST[key]
+                        line = f"{key}={value}\n"
+
+                lines.append(line)
+
+        with open(server_properties_path, "w") as f:
+            f.writelines(lines)
+
+        messages.success(request, "Server properties updated.")
+        return redirect("edit_server", server.id)
 
     return render(request, 'core_APP/edit_server.html', {
         'server': server,
+        'properties': properties,
     })
