@@ -129,3 +129,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Redirect @login_required to the login page
 LOGIN_URL = '/'
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/6.0/howto/static-files/
+
+STATIC_URL = 'static/'
+
+# 1. Tell Django where to LOOK for your custom app assets during development
+STATICFILES_DIRS = [
+    BASE_DIR / 'core_APP' / 'static',
+]
+
+# 2. Tell Django where to COLLECT all assets inside the container for production
+STATIC_ROOT = BASE_DIR / 'staticfiles'

@@ -1,5 +1,5 @@
 services:
-  panel:
+  mc-manager:
     build: .
 
     restart: unless-stopped
@@ -10,3 +10,6 @@ services:
     volumes:
       - ./data:/data
       - ./logs:/logs
+
+      # Docker socket
+      - /var/run/docker.sock:/var/run/docker.sock
