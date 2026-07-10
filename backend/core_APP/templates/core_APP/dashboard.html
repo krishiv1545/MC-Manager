@@ -7,7 +7,6 @@
     <ul class="nav-links">
         <li><a href="{% url 'dashboard' %}" class="active">Dashboard</a></li>
         <li><a href="{% url 'add_server' %}">Add Server</a></li>
-        <li><a href="{% url 'settings' %}">Settings</a></li>
     </ul>
     <div class="spacer"></div>
     <div class="nav-user">
@@ -28,7 +27,7 @@
     </ul>
     {% endif %}
 
-    <h2>Your Servers</h2>
+    <h2>Your Servers <span class="maintain-case">(Stored at: {{ mc_server_home }})</span></h2>
 
     {% if servers %}
     <table class="server-table">

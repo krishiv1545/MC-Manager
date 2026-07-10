@@ -478,3 +478,7 @@ a:hover {
 .save-btn:active {
     transform: scale(0.96);
 }
+
+.maintain-case {
+    text-transform: none !important;
+}

@@ -1,12 +1,14 @@
 FROM python:3.13-slim
 
-# Don't generate .pyc files
 ENV PYTHONDONTWRITEBYTECODE=1
-
-# Show Python output immediately in logs
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    docker.io \
+    curl \
+ && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 
@@ -14,7 +16,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Executable permissions
 RUN chmod +x entrypoint.sh
 
 EXPOSE 8000

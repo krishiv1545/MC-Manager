@@ -4,20 +4,20 @@ import os
 import uuid
 
 
-class UserSettings(models.Model):
-    """Stores per-user settings like the server home directory."""
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='settings')
-    server_home = models.CharField(
-        max_length=500,
-        default=os.path.join(os.path.expanduser('~'), 'MCServers'),
-        help_text='Root directory where Minecraft server folders are created.',
-    )
+# class UserSettings(models.Model):
+#     """Stores per-user settings like the server home directory."""
+#     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='settings')
+#     server_home = models.CharField(
+#         max_length=500,
+#         default=os.path.join(os.path.expanduser('~'), 'MCServers'),
+#         help_text='Root directory where Minecraft server folders are created.',
+#     )
 
-    class Meta:
-        verbose_name_plural = 'User Settings'
+#     class Meta:
+#         verbose_name_plural = 'User Settings'
 
-    def __str__(self):
-        return f"Settings for {self.user.username}"
+#     def __str__(self):
+#         return f"Settings for {self.user.username}"
 
 
 class MinecraftServer(models.Model):

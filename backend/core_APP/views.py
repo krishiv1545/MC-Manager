@@ -9,7 +9,8 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404
 
-from .models import UserSettings, MinecraftServer
+from .models import MinecraftServer
+# from .models import UserSettings
 
 import uuid
 import subprocess
@@ -82,24 +83,28 @@ def logout_view(request):
 def dashboard_view(request):
     """Main dashboard – list all servers owned by the current user."""
     servers = MinecraftServer.objects.filter(owner=request.user)
-    return render(request, 'core_APP/dashboard.html', {'servers': servers})
+
+    from .services.server_paths import MC_SERVER_HOME
+    mc_server_home = MC_SERVER_HOME
+
+    return render(request, 'core_APP/dashboard.html', {'servers': servers, 'mc_server_home': mc_server_home})
 
 
-@login_required
-def settings_view(request):
-    """View / update the server home directory."""
-    settings_obj, _ = UserSettings.objects.get_or_create(user=request.user)
+# @login_required
+# def settings_view(request):
+#     """View / update the server home directory."""
+#     settings_obj, _ = UserSettings.objects.get_or_create(user=request.user)
 
-    if request.method == 'POST':
-        new_home = request.POST.get('server_home', '').strip()
-        if new_home:
-            settings_obj.server_home = new_home
-            settings_obj.save()
-            messages.success(request, 'Server home directory updated.')
-        else:
-            messages.error(request, 'Path cannot be empty.')
+#     if request.method == 'POST':
+#         new_home = request.POST.get('server_home', '').strip()
+#         if new_home:
+#             settings_obj.server_home = new_home
+#             settings_obj.save()
+#             messages.success(request, 'Server home directory updated.')
+#         else:
+#             messages.error(request, 'Path cannot be empty.')
 
-    return render(request, 'core_APP/settings.html', {'settings': settings_obj})
+#     return render(request, 'core_APP/settings.html', {'settings': settings_obj})
 
 
 @login_required
@@ -114,7 +119,7 @@ def add_server_view(request):
             messages.error(request, 'Server name and version are required.')
         else:
             server_uuid = uuid.uuid4()
-            server_path = get_server_path(request.user.settings, server_uuid)
+            server_path = get_server_path(server_uuid)
 
             server = MinecraftServer.objects.create(
                 name=name,
@@ -150,7 +155,7 @@ def start_server_view(request, server_id):
         owner=request.user,
     )
 
-    server_path = get_server_path(request.user.settings, server.server_uuid)
+    server_path = get_server_path(server.server_uuid)
 
     try:
         subprocess.run(
@@ -184,7 +189,7 @@ def stop_server_view(request, server_id):
         owner=request.user,
     )
 
-    server_path = get_server_path(request.user.settings, server.server_uuid)
+    server_path = get_server_path(server.server_uuid)
 
     try:
         subprocess.run(
@@ -218,7 +223,7 @@ def edit_server_view(request, server_id):
         owner=request.user,
     )
 
-    server_properties_path = get_server_path(request.user.settings, server.server_uuid) / "data" / "server.properties"
+    server_properties_path = get_server_path(server.server_uuid) / "data" / "server.properties"
     print(server_properties_path)
 
     properties = {}
@@ -274,8 +279,8 @@ def playerdata_view(request, server_id):
             messages.error(request, "No player selected.")
             return redirect(request.path)
 
-        player_file = get_server_path(request.user.settings, server.server_uuid) / "data" / "world" / "playerdata" / f"{target_uuid}.dat"
-        server_root = get_server_path(request.user.settings, server.server_uuid) / "data"
+        player_file = get_server_path(server.server_uuid) / "data" / "world" / "playerdata" / f"{target_uuid}.dat"
+        server_root = get_server_path(server.server_uuid) / "data"
 
         try:
             if action in ["kill", "heal", "starve", "feed", "teleport"]:
@@ -409,9 +414,9 @@ def playerdata_view(request, server_id):
             messages.error(request, f"Error: {e}")
             return redirect(f"{request.path}?player={target_uuid}")
 
-    playerdata_path = get_server_path(request.user.settings, server.server_uuid) / "data" / "world" / "playerdata"
+    playerdata_path = get_server_path(server.server_uuid) / "data" / "world" / "playerdata"
 
-    server_root = get_server_path(request.user.settings, server.server_uuid) / "data"
+    server_root = get_server_path(server.server_uuid) / "data"
     ops = []
     whitelist = []
     bans = []
