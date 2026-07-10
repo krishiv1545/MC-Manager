@@ -71,7 +71,37 @@
         <main class="player-content">
             {% if selected_player %}
             <section class="panel">
-                <b>UUID:</b>&nbsp;&nbsp;{{ selected_player.uuid }}
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <b>UUID:</b>&nbsp;&nbsp;{{ selected_player.uuid }}
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <form method="post" style="margin: 0;">
+                            {% csrf_token %}
+                            <input type="hidden" name="player_uuid" value="{{ selected_player.uuid }}">
+                            <input type="hidden" name="action" value="{% if selected_player.is_op %}deop{% else %}op{% endif %}">
+                            <button type="submit" class="btn {% if selected_player.is_op %}btn-danger{% else %}btn-primary{% endif %}">
+                                {% if selected_player.is_op %}De-Op{% else %}Make Op{% endif %}
+                            </button>
+                        </form>
+                        <form method="post" style="margin: 0;">
+                            {% csrf_token %}
+                            <input type="hidden" name="player_uuid" value="{{ selected_player.uuid }}">
+                            <input type="hidden" name="action" value="{% if selected_player.is_whitelisted %}whitelist_remove{% else %}whitelist_add{% endif %}">
+                            <button type="submit" class="btn {% if selected_player.is_whitelisted %}btn-danger{% else %}btn-primary{% endif %}">
+                                {% if selected_player.is_whitelisted %}Remove Whitelist{% else %}Add Whitelist{% endif %}
+                            </button>
+                        </form>
+                        <form method="post" style="margin: 0;">
+                            {% csrf_token %}
+                            <input type="hidden" name="player_uuid" value="{{ selected_player.uuid }}">
+                            <input type="hidden" name="action" value="{% if selected_player.is_banned %}unban{% else %}ban{% endif %}">
+                            <button type="submit" class="btn {% if selected_player.is_banned %}btn-success{% else %}btn-danger{% endif %}">
+                                {% if selected_player.is_banned %}Unban{% else %}Ban{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </section>
 
             <section class="stats-grid">
@@ -102,6 +132,54 @@
                         {{ selected_player.gamemode }}
                     </div>
                 </div>
+            </section>
+
+            <section class="panel" style="margin-top: 20px;">
+                <h3>Player Actions</h3>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <form method="post" style="margin: 0;">
+                        {% csrf_token %}
+                        <input type="hidden" name="player_uuid" value="{{ selected_player.uuid }}">
+                        <input type="hidden" name="action" value="kill">
+                        <button type="submit" class="btn btn-danger">Kill</button>
+                    </form>
+                    <form method="post" style="margin: 0;">
+                        {% csrf_token %}
+                        <input type="hidden" name="player_uuid" value="{{ selected_player.uuid }}">
+                        <input type="hidden" name="action" value="heal">
+                        <button type="submit" class="btn btn-success">Heal</button>
+                    </form>
+                    <form method="post" style="margin: 0;">
+                        {% csrf_token %}
+                        <input type="hidden" name="player_uuid" value="{{ selected_player.uuid }}">
+                        <input type="hidden" name="action" value="starve">
+                        <button type="submit" class="btn btn-danger">Starve</button>
+                    </form>
+                    <form method="post" style="margin: 0;">
+                        {% csrf_token %}
+                        <input type="hidden" name="player_uuid" value="{{ selected_player.uuid }}">
+                        <input type="hidden" name="action" value="feed">
+                        <button type="submit" class="btn btn-success">Feed</button>
+                    </form>
+                </div>
+                
+                <form method="post" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    {% csrf_token %}
+                    <input type="hidden" name="player_uuid" value="{{ selected_player.uuid }}">
+                    <input type="hidden" name="action" value="teleport">
+                    
+                    <select name="dimension" style="padding: 5px; border-radius: 4px; border: 1px solid #444; background: #2b2b2b; color: white;">
+                        <option value="minecraft:overworld">Overworld</option>
+                        <option value="minecraft:the_nether">The Nether</option>
+                        <option value="minecraft:the_end">The End</option>
+                    </select>
+                    
+                    <input type="number" name="x" placeholder="X" step="any" required style="width: 80px; padding: 5px; border-radius: 4px; border: 1px solid #444; background: #2b2b2b; color: white;">
+                    <input type="number" name="y" placeholder="Y" step="any" required style="width: 80px; padding: 5px; border-radius: 4px; border: 1px solid #444; background: #2b2b2b; color: white;">
+                    <input type="number" name="z" placeholder="Z" step="any" required style="width: 80px; padding: 5px; border-radius: 4px; border: 1px solid #444; background: #2b2b2b; color: white;">
+                    
+                    <button type="submit" class="btn btn-primary">Teleport</button>
+                </form>
             </section>
 
             <div class="info-grid">
@@ -139,6 +217,30 @@
                         </tr>
                     </table>
                 </section>
+
+                {% if selected_player.last_death_location %}
+                <section class="panel">
+                    <h3>Last Death</h3>
+                    <table class="info-table">
+                        <tr>
+                            <th>Dimension</th>
+                            <td>{{ selected_player.last_death_location.dimension }}</td>
+                        </tr>
+                        <tr>
+                            <th>X</th>
+                            <td>{{ selected_player.last_death_location.pos.0|floatformat:2 }}</td>
+                        </tr>
+                        <tr>
+                            <th>Y</th>
+                            <td>{{ selected_player.last_death_location.pos.1|floatformat:2 }}</td>
+                        </tr>
+                        <tr>
+                            <th>Z</th>
+                            <td>{{ selected_player.last_death_location.pos.2|floatformat:2 }}</td>
+                        </tr>
+                    </table>
+                </section>
+                {% endif %}
 
                 <section class="panel">
                     <h3>Spawn Point</h3>

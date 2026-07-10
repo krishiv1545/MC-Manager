@@ -14,6 +14,9 @@ from .models import UserSettings, MinecraftServer
 import uuid
 import subprocess
 import nbtlib
+import json
+from datetime import datetime
+from django.urls import reverse
 
 from .services.server_creator import create_server_on_disk
 from .services.server_paths import get_server_path
@@ -263,7 +266,174 @@ def playerdata_view(request, server_id):
         owner=request.user,
     )
 
+    if request.method == "POST":
+        action = request.POST.get("action")
+        target_uuid = request.POST.get("player_uuid")
+
+        if not target_uuid:
+            messages.error(request, "No player selected.")
+            return redirect(request.path)
+
+        player_file = get_server_path(request.user.settings, server.server_uuid) / "data" / "world" / "playerdata" / f"{target_uuid}.dat"
+        server_root = get_server_path(request.user.settings, server.server_uuid) / "data"
+
+        try:
+            if action in ["kill", "heal", "starve", "feed", "teleport"]:
+                if not player_file.exists():
+                    messages.error(request, "Player data not found.")
+                    return redirect(f"{request.path}?player={target_uuid}")
+
+                nbt_file = nbtlib.load(player_file)
+                
+                if action == "kill":
+                    nbt_file.root["Health"] = nbtlib.tag.Float(0.0)
+                    nbt_file.save()
+                    messages.success(request, f"Killed player.")
+                elif action == "heal":
+                    nbt_file.root["Health"] = nbtlib.tag.Float(20.0)
+                    nbt_file.save()
+                    messages.success(request, f"Healed player.")
+                elif action == "starve":
+                    nbt_file.root["foodLevel"] = nbtlib.tag.Int(0)
+                    nbt_file.save()
+                    messages.success(request, f"Starved player.")
+                elif action == "feed":
+                    nbt_file.root["foodLevel"] = nbtlib.tag.Int(20)
+                    nbt_file.save()
+                    messages.success(request, f"Fed player.")
+                elif action == "teleport":
+                    dim = request.POST.get("dimension", "minecraft:overworld")
+                    try:
+                        x = float(request.POST.get("x", 0))
+                        y = float(request.POST.get("y", 0))
+                        z = float(request.POST.get("z", 0))
+                    except ValueError:
+                        x, y, z = 0.0, 0.0, 0.0
+                    
+                    nbt_file.root["Dimension"] = nbtlib.tag.String(dim)
+                    nbt_file.root["Pos"] = nbtlib.tag.List[nbtlib.tag.Double]([nbtlib.tag.Double(x), nbtlib.tag.Double(y), nbtlib.tag.Double(z)])
+                    nbt_file.save()
+                    messages.success(request, f"Teleported player to {x}, {y}, {z} in {dim}.")
+
+            elif action in ["op", "deop", "whitelist_add", "whitelist_remove", "ban", "unban"]:
+                username = target_uuid
+                usercache_path = server_root / "usercache.json"
+                if usercache_path.exists():
+                    try:
+                        with open(usercache_path, "r") as f:
+                            cache = json.load(f)
+                            for entry in cache:
+                                if entry.get("uuid") == target_uuid:
+                                    username = entry.get("name", target_uuid)
+                                    break
+                    except:
+                        pass
+                
+                if action in ["op", "deop"]:
+                    ops_path = server_root / "ops.json"
+                    ops = []
+                    if ops_path.exists():
+                        try:
+                            with open(ops_path, "r") as f:
+                                ops = json.load(f)
+                        except:
+                            pass
+                    
+                    ops = [op for op in ops if op.get("uuid") != target_uuid]
+                    if action == "op":
+                        ops.append({
+                            "uuid": target_uuid,
+                            "name": username,
+                            "level": 4,
+                            "bypassesPlayerLimit": False
+                        })
+                        messages.success(request, f"Opped player {username}.")
+                    else:
+                        messages.success(request, f"Deopped player {username}.")
+                        
+                    with open(ops_path, "w") as f:
+                        json.dump(ops, f, indent=2)
+
+                elif action in ["whitelist_add", "whitelist_remove"]:
+                    wl_path = server_root / "whitelist.json"
+                    wl = []
+                    if wl_path.exists():
+                        try:
+                            with open(wl_path, "r") as f:
+                                wl = json.load(f)
+                        except:
+                            pass
+                    
+                    wl = [w for w in wl if w.get("uuid") != target_uuid]
+                    if action == "whitelist_add":
+                        wl.append({
+                            "uuid": target_uuid,
+                            "name": username
+                        })
+                        messages.success(request, f"Whitelisted player {username}.")
+                    else:
+                        messages.success(request, f"Removed player {username} from whitelist.")
+                        
+                    with open(wl_path, "w") as f:
+                        json.dump(wl, f, indent=2)
+
+                elif action in ["ban", "unban"]:
+                    bans_path = server_root / "banned-players.json"
+                    bans = []
+                    if bans_path.exists():
+                        try:
+                            with open(bans_path, "r") as f:
+                                bans = json.load(f)
+                        except:
+                            pass
+                    
+                    bans = [b for b in bans if b.get("uuid") != target_uuid]
+                    if action == "ban":
+                        bans.append({
+                            "uuid": target_uuid,
+                            "name": username,
+                            "created": datetime.now().strftime("%Y-%m-%d %H:%M:%S Z"),
+                            "source": "Server",
+                            "expires": "forever",
+                            "reason": "Banned by an operator."
+                        })
+                        messages.success(request, f"Banned player {username}.")
+                    else:
+                        messages.success(request, f"Unbanned player {username}.")
+                        
+                    with open(bans_path, "w") as f:
+                        json.dump(bans, f, indent=2)
+                        
+            return redirect(f"{request.path}?player={target_uuid}")
+        except Exception as e:
+            messages.error(request, f"Error: {e}")
+            return redirect(f"{request.path}?player={target_uuid}")
+
     playerdata_path = get_server_path(request.user.settings, server.server_uuid) / "data" / "world" / "playerdata"
+
+    server_root = get_server_path(request.user.settings, server.server_uuid) / "data"
+    ops = []
+    whitelist = []
+    bans = []
+    try:
+        if (server_root / "ops.json").exists():
+            with open(server_root / "ops.json", "r") as f:
+                ops = json.load(f)
+    except: pass
+    try:
+        if (server_root / "whitelist.json").exists():
+            with open(server_root / "whitelist.json", "r") as f:
+                whitelist = json.load(f)
+    except: pass
+    try:
+        if (server_root / "banned-players.json").exists():
+            with open(server_root / "banned-players.json", "r") as f:
+                bans = json.load(f)
+    except: pass
+
+    op_uuids = {op.get("uuid") for op in ops if op.get("uuid")}
+    whitelist_uuids = {w.get("uuid") for w in whitelist if w.get("uuid")}
+    ban_uuids = {b.get("uuid") for b in bans if b.get("uuid")}
 
     players = []
 
@@ -359,6 +529,13 @@ def playerdata_view(request, server_id):
                 "ender": ender,
 
                 "data_version": nbt.get("DataVersion"),
+                "is_op": file.stem in op_uuids,
+                "is_whitelisted": file.stem in whitelist_uuids,
+                "is_banned": file.stem in ban_uuids,
+                "last_death_location": {
+                    "dimension": str(nbt.get("LastDeathLocation", {}).get("dimension", "")),
+                    "pos": nbt.get("LastDeathLocation", {}).get("pos", [])
+                } if nbt.get("LastDeathLocation") else None,
             })
 
     selected_uuid = request.GET.get("player")
