@@ -1,5 +1,3 @@
-from pprint import pprint
-
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -18,9 +16,11 @@ import nbtlib
 import json
 from datetime import datetime
 from django.urls import reverse
+import os
+import socket
 
 from .services.server_creator import create_server_on_disk
-from .services.server_paths import get_server_path
+from .services.server_paths import get_server_path, get_host_server_path
 from .services.server_creator import get_next_port
 
 # ── Auth views ───────────────────────────────────────────────────────────────
@@ -79,10 +79,19 @@ def logout_view(request):
 
 # ── Dashboard views ──────────────────────────────────────────────────────────
 
+def get_local_ipv4():
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+        s.connect(("8.8.8.8", 80))  # No packets are actually sent
+        return s.getsockname()[0]
+    return "localhost"  # Fallback if unable to determine
+
+
 @login_required
 def dashboard_view(request):
     """Main dashboard – list all servers owned by the current user."""
     servers = MinecraftServer.objects.filter(owner=request.user)
+    for s in servers:
+        s.address = f"{get_local_ipv4()}:{s.port}"  # Add address attribute for display
 
     from .services.server_paths import MC_SERVER_HOME
     mc_server_home = MC_SERVER_HOME
@@ -158,11 +167,14 @@ def start_server_view(request, server_id):
     server_path = get_server_path(server.server_uuid)
 
     try:
+        env = os.environ.copy()
+        env["SERVER_PATH"] = str(get_host_server_path(server.server_uuid).as_posix())
+        print("Starting server with SERVER_PATH:", env["SERVER_PATH"])
+
         subprocess.run(
             ["docker", "compose", "up", "-d"],
             cwd=server_path,
-            capture_output=True,
-            text=True,
+            env=env,
             check=True,
         )
 
@@ -192,9 +204,13 @@ def stop_server_view(request, server_id):
     server_path = get_server_path(server.server_uuid)
 
     try:
+        env = os.environ.copy()
+        env["SERVER_PATH"] = str(get_host_server_path(server.server_uuid).as_posix())
+
         subprocess.run(
             ["docker", "compose", "down"],
             cwd=server_path,
+            env=env,
             capture_output=True,
             text=True,
             check=True,

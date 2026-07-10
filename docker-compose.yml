@@ -7,9 +7,15 @@ services:
     ports:
       - "8000:8000"
 
+    environment:
+      MC_SERVER_HOME: /mcservers
+
     volumes:
       - ./data:/data
       - ./logs:/logs
+
+      # Minecraft servers home (mounting)
+      - ${HOST_MC_SERVER_HOME}:/mcservers
 
       # Docker socket
       - /var/run/docker.sock:/var/run/docker.sock

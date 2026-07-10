@@ -198,7 +198,7 @@ a:hover {
 /* ── Page container ──────────────────────────────────────────────────────── */
 
 .page {
-    max-width: 1000px;
+    width: 1000px;
     margin: 32px auto;
     padding: 0 20px;
 }
@@ -481,4 +481,10 @@ a:hover {
 
 .maintain-case {
     text-transform: none !important;
+}
+
+.server-address {
+    font-family: monospace;
+    color: #1a5276;
+    font-weight: 600;
 }

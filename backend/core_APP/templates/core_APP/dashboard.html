@@ -18,7 +18,7 @@
     </div>
 </nav>
 
-<div class="page">
+<div class="page" style="width: 90%;">
     {% if messages %}
     <ul class="messages">
         {% for msg in messages %}
@@ -37,6 +37,7 @@
                 <th>Name</th>
                 <th>Version</th>
                 <th>Mod Loader</th>
+                <th>Address</th>
                 <th>Created</th>
                 <th>Status</th>
                 <th>Action</th>
@@ -45,10 +46,11 @@
         <tbody>
             {% for s in servers %}
             <tr>
-                <td>{{ s.server_uuid }}</td>
+                <td title="{{ s.server_uuid }}">{{ s.server_uuid|stringformat:"s"|slice:":8" }}</td>
                 <td>{{ s.name }}</td>
                 <td>{{ s.mc_version }}</td>
                 <td>{{ s.get_mod_loader_display }}</td>
+                <td><span class="server-address" onclick="copyToClipboard(this)" style="cursor: pointer;">{{ s.address }}</span></td>
                 <td>{{ s.created_at|date:"M d, Y" }}</td>
                 <td class="server-status">{{ s.get_status_display }}</td>
                 <td class="action-buttons">
@@ -80,4 +82,17 @@
     </div>
     {% endif %}
 </div>
+<script>
+function copyToClipboard(element) {
+    const original = element.textContent.trim();
+
+    navigator.clipboard.writeText(original).then(() => {
+        element.textContent = "Copied!";
+
+        setTimeout(() => {
+            element.textContent = original;
+        }, 1000);
+    });
+}
+</script>
 {% endblock %}
