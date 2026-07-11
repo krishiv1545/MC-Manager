@@ -46,7 +46,14 @@
         <tbody>
             {% for s in servers %}
             <tr>
-                <td title="{{ s.server_uuid }}">{{ s.server_uuid|stringformat:"s"|slice:":8" }}</td>
+                <td
+                    title="{{ s.server_uuid }}"
+                    data-uuid="{{ s.server_uuid }}"
+                    onclick="copyUUIDToClipboard(this)"
+                    style="cursor: pointer;"
+                >
+                    {{ s.server_uuid|slice:":8" }}
+                </td>
                 <td>{{ s.name }}</td>
                 <td>{{ s.mc_version }}</td>
                 <td>{{ s.get_mod_loader_display }}</td>
@@ -82,11 +89,25 @@
     </div>
     {% endif %}
 </div>
+
 <script>
 function copyToClipboard(element) {
     const original = element.textContent.trim();
 
     navigator.clipboard.writeText(original).then(() => {
+        element.textContent = "Copied!";
+
+        setTimeout(() => {
+            element.textContent = original;
+        }, 1000);
+    });
+}
+
+function copyUUIDToClipboard(element) {
+    const original = element.textContent.trim();
+    const uuid = element.dataset.uuid;
+
+    navigator.clipboard.writeText(uuid).then(() => {
         element.textContent = "Copied!";
 
         setTimeout(() => {
