@@ -79,7 +79,6 @@ def logout_view(request):
 
 # ── Dashboard views ──────────────────────────────────────────────────────────
 
-# TODO: WONT WORK INSIDE DOCKER CONTAINER
 def get_local_ipv4():
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         s.connect(("8.8.8.8", 80))  # No packets are actually sent
@@ -92,7 +91,6 @@ def dashboard_view(request):
     """Main dashboard – list all servers owned by the current user."""
     servers = MinecraftServer.objects.filter(owner=request.user)
     for s in servers:
-        s.server_uuid = str(s.server_uuid)
         s.address = f"{get_local_ipv4()}:{s.port}"  # Add address attribute for display
 
     from .services.server_paths import MC_SERVER_HOME
