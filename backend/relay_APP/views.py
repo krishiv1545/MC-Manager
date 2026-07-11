@@ -10,21 +10,13 @@ def relay_lookup(request, server_uuid):
         server_uuid=server_uuid,
     )
 
-    if not server:
-        return JsonResponse({
-            "error": True,
-            "message": "Server not found",
-        })
-
     if server.status != "running":
         return JsonResponse({
-            "error": False,
             "server_uuid": server_uuid,
             "running": False,
         })
 
     return JsonResponse({
-        "error": False,
         "server_uuid": server_uuid,
         "running": True,
         "port": server.port,
