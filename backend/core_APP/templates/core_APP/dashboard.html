@@ -41,7 +41,7 @@
                 <th>Created By</th>
                 <th>Created</th>
                 <th>Status</th>
-                <th>Action</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -62,26 +62,48 @@
                 <td>{{ s.created_at|date:"M d, Y" }}</td>
                 <td class="server-status">{{ s.get_status_display }}</td>
                 <td class="action-buttons">
+                    <!-- Start -->
                     <form method="post" action="{% url 'start_server' s.id %}" style="display:inline;">
                         {% csrf_token %}
-                        <button type="submit" class="play-btn {% if s.status == 'running' %}disabled-btn{% endif %}">
+                        <button type="submit" title="Start server"
+                                class="play-btn {% if s.status == 'running' %}disabled-btn{% endif %}">
                             <span class="play-icon"></span>
                         </button>
                     </form>
 
+                    <!-- Stop -->
                     <form method="post" action="{% url 'stop_server' s.id %}" style="display:inline;">
                         {% csrf_token %}
-                        <button type="submit" class="stop-btn {% if s.status != 'running' %}disabled-btn{% endif %}">
+                        <button type="submit" title="Stop server"
+                                class="stop-btn {% if s.status != 'running' %}disabled-btn{% endif %}">
                             <span class="stop-icon"></span>
                         </button>
                     </form>
 
-                    <a href="{% url 'edit_server' s.id %}">Server Settings</a>
+                    <!-- Divider -->
+                    <span class="action-divider"></span>
 
-                    <a href="{% url 'playerdata' s.id %}">Player Data</a>
+                    <!-- Server Settings -->
+                    <a href="{% url 'edit_server' s.id %}" class="icon-btn" title="Server Settings">
+                        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+                        </svg>
+                    </a>
 
+                    <!-- Player Data -->
+                    <a href="{% url 'playerdata' s.id %}" class="icon-btn" title="Player Data">
+                        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                        </svg>
+                    </a>
+
+                    <!-- Manage Access (owner only) -->
                     {% if s.is_owner %}
-                    <a href="{% url 'manage_access' s.id %}" class="access-btn">Manage Access</a>
+                    <a href="{% url 'manage_access' s.id %}" class="icon-btn icon-btn--access" title="Manage Access">
+                        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z" clip-rule="evenodd"/>
+                        </svg>
+                    </a>
                     {% endif %}
                 </td>
             </tr>

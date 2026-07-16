@@ -628,3 +628,53 @@ a:hover {
     color: #222;
     text-decoration: none;
 }
+
+/* ── Icon buttons (Server Settings, Player Data, Manage Access) ───────────── */
+
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid #bbb;
+    background: #fff;
+    color: #444;
+    border-radius: 3px;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    flex-shrink: 0;
+    text-decoration: none;
+}
+.icon-btn svg {
+    width: 15px;
+    height: 15px;
+    pointer-events: none;
+}
+.icon-btn:hover {
+    background: #222;
+    border-color: #222;
+    color: #fff;
+    text-decoration: none;
+}
+
+/* Amber tint for the access/key icon */
+.icon-btn--access {
+    border-color: #c68b00;
+    color: #7b5200;
+}
+.icon-btn--access:hover {
+    background: #7b5200;
+    border-color: #7b5200;
+    color: #fff;
+}
+
+/* Thin vertical separator between the play/stop group and the icon group */
+.action-divider {
+    display: inline-block;
+    width: 1px;
+    height: 24px;
+    background: #ddd;
+    margin: 0 2px;
+    vertical-align: middle;
+    flex-shrink: 0;
+}

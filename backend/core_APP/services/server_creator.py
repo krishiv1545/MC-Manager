@@ -38,9 +38,6 @@ def create_server_on_disk(server, server_path):
             volumes:
               - "${{SERVER_PATH}}/data:/data"
 
-            mem_limit: {mem}g
-            memswap_limit: {mem}g
-
             restart: unless-stopped
         """).strip()
 
