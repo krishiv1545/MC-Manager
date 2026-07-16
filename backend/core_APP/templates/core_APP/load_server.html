@@ -1,0 +1,77 @@
+{% extends "core_APP/base.html" %}
+{% block title %}Load Server · MC-Manager{% endblock %}
+
+{% block body %}
+<nav class="navbar">
+    <span class="brand">MC-Manager</span>
+    <ul class="nav-links">
+        <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li><a href="{% url 'add_server' %}">Add Server</a></li>
+        <li><a href="{% url 'load_server' %}" class="active">Load Server</a></li>
+    </ul>
+    <div class="spacer"></div>
+    <div class="nav-user">
+        <span>{{ request.user.username }}</span>
+        <form method="post" action="{% url 'logout' %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit">Log Out</button>
+        </form>
+    </div>
+</nav>
+
+<div class="page">
+    {% if messages %}
+    <ul class="messages">
+        {% for msg in messages %}
+        <li class="{{ msg.tags }}">{{ msg }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <h2>Load Existing Server</h2>
+
+    <div class="load-info">
+        <p>Use this page to import an existing Minecraft server directory into MC-Manager.</p>
+
+        <div class="load-requirements">
+            <p class="load-requirements-title">Your server folder must contain:</p>
+            <ul>
+                <li>
+                    <code>docker-compose.yml</code>
+                    <span>— used to read the server version, type, and port</span>
+                </li>
+                <li>
+                    <code>data/</code>
+                    <span>— your world, player data, and server.properties (data/ is optional; new server and world will be created)</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="load-what-happens">
+            <p class="load-requirements-title">What happens when you load:</p>
+            <ol>
+                <li>The entire folder is <strong>copied</strong> into MC-Manager's server storage and your original files are left untouched.</li>
+                <li>The version, mod loader, and RAM limit are read from <code>docker-compose.yml</code> automatically.</li>
+                <li>If the original port is already in use, a new port is assigned.</li>
+                <li>The server appears on your Dashboard, ready to start.</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="form-card" style="margin-top: 24px;">
+        <form method="post">
+            {% csrf_token %}
+
+            <label for="name">Display Name</label>
+            <input type="text" id="name" name="name" placeholder="e.g. Old Survival World" required autofocus>
+
+            <label for="source_dir">Server Directory Path</label>
+            <input type="text" id="source_dir" name="source_dir"
+                   placeholder="e.g. C:\Users\You\OldServer  or  /home/you/oldserver">
+            <p class="field-hint">Paste the full path to the folder that contains <code>docker-compose.yml</code>.</p>
+
+            <button type="submit">Import Server</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -735,3 +735,64 @@ footer a:hover {
     display: inline-block;
     transform: translateY(2px);
 }
+
+/* ── Load Server page ─────────────────────────────────────────────────────── */
+
+.load-info {
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 20px 24px;
+    margin-bottom: 0;
+    font-size: 13px;
+    color: #444;
+    line-height: 1.6;
+}
+
+.load-info > p:first-child {
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+
+.load-requirements {
+    margin-bottom: 16px;
+}
+
+.load-requirements-title {
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.load-requirements ul,
+.load-what-happens ol {
+    padding-left: 20px;
+    margin: 0;
+}
+
+.load-requirements li,
+.load-what-happens li {
+    margin-bottom: 5px;
+}
+
+.load-requirements code,
+.load-what-happens code,
+.field-hint code {
+    font-family: monospace;
+    background: #eee;
+    padding: 1px 5px;
+    border-radius: 2px;
+    font-size: 12px;
+}
+
+.load-requirements li span,
+.load-what-happens li span {
+    color: #777;
+}
+
+.load-what-happens {
+    border-top: 1px solid #e8e8e8;
+    padding-top: 14px;
+}

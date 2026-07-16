@@ -22,6 +22,7 @@ import socket
 from .services.server_creator import create_server_on_disk, update_compose_memory
 from .services.server_paths import get_server_path, get_host_server_path
 from .services.server_creator import get_next_port
+from .services.server_importer import import_server
 
 # ── Auth views ───────────────────────────────────────────────────────────────
 
@@ -170,6 +171,29 @@ def add_server_view(request):
 
     loader_choices = MinecraftServer.MOD_LOADER_CHOICES
     return render(request, 'core_APP/add_server.html', {'loader_choices': loader_choices})
+
+
+@login_required
+def load_server_view(request):
+    """Import an existing Minecraft server directory into MC-Manager."""
+    if request.method == 'POST':
+        source_dir = request.POST.get('source_dir', '').strip()
+        server_name = request.POST.get('name', '').strip()
+
+        if not source_dir or not server_name:
+            messages.error(request, 'Server name and directory path are both required.')
+            return redirect('load_server')
+
+        success, result = import_server(source_dir, server_name, request.user)
+
+        if success:
+            messages.success(request, f'Server "{server_name}" imported successfully.')
+            return redirect('dashboard')
+        else:
+            messages.error(request, result)
+            return redirect('load_server')
+
+    return render(request, 'core_APP/load_server.html')
 
 
 @require_POST
