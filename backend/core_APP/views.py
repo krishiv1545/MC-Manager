@@ -421,19 +421,19 @@ def playerdata_view(request, server_id):
                 nbt_file = nbtlib.load(player_file)
                 
                 if action == "kill":
-                    nbt_file.root["Health"] = nbtlib.tag.Float(0.0)
+                    nbt_file["Health"] = nbtlib.tag.Float(0.0)
                     nbt_file.save()
                     messages.success(request, f"Killed player.")
                 elif action == "heal":
-                    nbt_file.root["Health"] = nbtlib.tag.Float(20.0)
+                    nbt_file["Health"] = nbtlib.tag.Float(20.0)
                     nbt_file.save()
                     messages.success(request, f"Healed player.")
                 elif action == "starve":
-                    nbt_file.root["foodLevel"] = nbtlib.tag.Int(0)
+                    nbt_file["foodLevel"] = nbtlib.tag.Int(0)
                     nbt_file.save()
                     messages.success(request, f"Starved player.")
                 elif action == "feed":
-                    nbt_file.root["foodLevel"] = nbtlib.tag.Int(20)
+                    nbt_file["foodLevel"] = nbtlib.tag.Int(20)
                     nbt_file.save()
                     messages.success(request, f"Fed player.")
                 elif action == "teleport":
@@ -445,8 +445,8 @@ def playerdata_view(request, server_id):
                     except ValueError:
                         x, y, z = 0.0, 0.0, 0.0
                     
-                    nbt_file.root["Dimension"] = nbtlib.tag.String(dim)
-                    nbt_file.root["Pos"] = nbtlib.tag.List[nbtlib.tag.Double]([nbtlib.tag.Double(x), nbtlib.tag.Double(y), nbtlib.tag.Double(z)])
+                    nbt_file["Dimension"] = nbtlib.tag.String(dim)
+                    nbt_file["Pos"] = nbtlib.tag.List[nbtlib.tag.Double]([nbtlib.tag.Double(x), nbtlib.tag.Double(y), nbtlib.tag.Double(z)])
                     nbt_file.save()
                     messages.success(request, f"Teleported player to {x}, {y}, {z} in {dim}.")
 
