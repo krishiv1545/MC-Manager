@@ -11,8 +11,8 @@ services:
       MC_SERVER_HOME: /mcservers
 
     volumes:
-      - ./data:/data
-      - ./logs:/logs
+      - ./data:/app/data
+      - ./logs:/app/logs
 
       # Minecraft servers home (mounting)
       - ${HOST_MC_SERVER_HOME}:/mcservers
