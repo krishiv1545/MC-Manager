@@ -1,0 +1,100 @@
+{% extends "core_APP/base.html" %}
+{% block title %}Manage Access · {{ server.name }} · MC-Manager{% endblock %}
+
+{% block body %}
+<nav class="navbar">
+    <span class="brand">MC-Manager</span>
+    <ul class="nav-links">
+        <li><a href="{% url 'dashboard' %}" class="active">Dashboard</a></li>
+        <li><a href="{% url 'add_server' %}">Add Server</a></li>
+    </ul>
+    <div class="spacer"></div>
+    <div class="nav-user">
+        <span>{{ request.user.username }}</span>
+        <form method="post" action="{% url 'logout' %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit">Log Out</button>
+        </form>
+    </div>
+</nav>
+
+<div class="page">
+    {% if messages %}
+    <ul class="messages">
+        {% for msg in messages %}
+        <li class="{{ msg.tags }}">{{ msg }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <h2>Manage Access — <span class="server-name">{{ server.name }}</span></h2>
+    <p class="access-intro">
+        Only <strong>you</strong> (the owner) can see this page. Users you add here can view and manage
+        this server exactly like an admin, but <em>cannot</em> edit this access list.
+    </p>
+
+    <div class="access-sections">
+
+        <!-- Grant access -->
+        <div class="form-card access-grant-card">
+            <h3>Grant Access</h3>
+            {% if available_users %}
+            <form method="post" action="{% url 'manage_access' server.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="grant">
+                <label for="user_id">Select a user</label>
+                <select id="user_id" name="user_id">
+                    {% for u in available_users %}
+                    <option value="{{ u.id }}">{{ u.username }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="grant-btn">Grant Access</button>
+            </form>
+            {% else %}
+            <p class="no-users-msg">No other users available to grant access to.</p>
+            {% endif %}
+        </div>
+
+        <!-- Current access list -->
+        <div class="access-list-card">
+            <h3>Users with Access</h3>
+            {% if access_grants %}
+            <table class="server-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Granted By</th>
+                        <th>Granted On</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for grant in access_grants %}
+                    <tr>
+                        <td>{{ grant.user.username }}</td>
+                        <td>{{ grant.granted_by.username }}</td>
+                        <td>{{ grant.granted_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            <form method="post" action="{% url 'manage_access' server.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="revoke">
+                                <input type="hidden" name="user_id" value="{{ grant.user.id }}">
+                                <button type="submit" class="revoke-btn">Revoke</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="no-users-msg">No users have been granted access yet.</p>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <div style="margin-top: 1.5rem;">
+        <a href="{% url 'dashboard' %}" class="back-link">← Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

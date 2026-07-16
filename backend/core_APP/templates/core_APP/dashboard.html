@@ -38,6 +38,7 @@
                 <th>Version</th>
                 <th>Mod Loader</th>
                 <th>Address</th>
+                <th>Created By</th>
                 <th>Created</th>
                 <th>Status</th>
                 <th>Action</th>
@@ -51,6 +52,13 @@
                 <td>{{ s.mc_version }}</td>
                 <td>{{ s.get_mod_loader_display }}</td>
                 <td><span class="server-address" onclick="copyToClipboard(this)" style="cursor: pointer;">{{ s.address }}</span></td>
+                <td>
+                    {% if s.is_owner %}
+                        <span class="owner-badge">{{ s.owner.username }} (You)</span>
+                    {% else %}
+                        {{ s.owner.username }}
+                    {% endif %}
+                </td>
                 <td>{{ s.created_at|date:"M d, Y" }}</td>
                 <td class="server-status">{{ s.get_status_display }}</td>
                 <td class="action-buttons">
@@ -71,6 +79,10 @@
                     <a href="{% url 'edit_server' s.id %}">Server Settings</a>
 
                     <a href="{% url 'playerdata' s.id %}">Player Data</a>
+
+                    {% if s.is_owner %}
+                    <a href="{% url 'manage_access' s.id %}" class="access-btn">Manage Access</a>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}

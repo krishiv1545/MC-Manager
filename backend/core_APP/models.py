@@ -4,22 +4,6 @@ import os
 import uuid
 
 
-# class UserSettings(models.Model):
-#     """Stores per-user settings like the server home directory."""
-#     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='settings')
-#     server_home = models.CharField(
-#         max_length=500,
-#         default=os.path.join(os.path.expanduser('~'), 'MCServers'),
-#         help_text='Root directory where Minecraft server folders are created.',
-#     )
-
-#     class Meta:
-#         verbose_name_plural = 'User Settings'
-
-#     def __str__(self):
-#         return f"Settings for {self.user.username}"
-
-
 class MinecraftServer(models.Model):
     """Represents a single Minecraft server entry."""
 
@@ -68,9 +52,42 @@ class MinecraftServer(models.Model):
         null=True,
         blank=True,
     )
+    memory_gb = models.PositiveIntegerField(
+        default=2,
+        verbose_name='Memory (GB)',
+        help_text='RAM limit for the Minecraft server container in gigabytes.',
+    )
 
     class Meta:
         ordering = ['-created_at']
 
     def __str__(self):
         return f"{self.name} ({self.mc_version} / {self.get_mod_loader_display()})"
+
+
+class ServerAccess(models.Model):
+    """Grants a user the ability to view and manage a server they do not own."""
+
+    server = models.ForeignKey(
+        MinecraftServer,
+        on_delete=models.CASCADE,
+        related_name='access_grants',
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='server_access',
+    )
+    granted_by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='access_granted_by',
+    )
+    granted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('server', 'user')
+        ordering = ['granted_at']
+
+    def __str__(self):
+        return f"{self.user.username} → {self.server.name} (granted by {self.granted_by.username})"

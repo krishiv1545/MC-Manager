@@ -3,12 +3,12 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404, HttpResponseForbidden
 from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 
-from .models import MinecraftServer
-# from .models import UserSettings
+from .models import MinecraftServer, ServerAccess
 
 import uuid
 import subprocess
@@ -80,7 +80,7 @@ def logout_view(request):
     return redirect('login')
 
 
-# ── Dashboard views ──────────────────────────────────────────────────────────
+# ── Helpers ──────────────────────────────────────────────────────────────────
 
 def get_local_ipv4():
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
@@ -89,34 +89,39 @@ def get_local_ipv4():
     return "localhost"  # Fallback if unable to determine
 
 
+def get_accessible_server(request, server_id):
+    """
+    Return the MinecraftServer with the given ID if the current user is the
+    owner OR has been explicitly granted access via ServerAccess.
+    Raises Http404 if no such server exists at all, or if the user has no
+    access to it.
+    """
+    server = get_object_or_404(MinecraftServer, id=server_id)
+    if server.owner == request.user:
+        return server
+    if ServerAccess.objects.filter(server=server, user=request.user).exists():
+        return server
+    raise Http404("You do not have access to this server.")
+
+
+# ── Dashboard views ──────────────────────────────────────────────────────────
+
 @login_required
 def dashboard_view(request):
-    """Main dashboard – list all servers owned by the current user."""
-    servers = MinecraftServer.objects.filter(owner=request.user)
+    """Main dashboard – list all servers the current user owns or has access to."""
+    owned_ids = MinecraftServer.objects.filter(owner=request.user).values_list('id', flat=True)
+    granted_ids = ServerAccess.objects.filter(user=request.user).values_list('server_id', flat=True)
+    all_ids = set(owned_ids) | set(granted_ids)
+    servers = MinecraftServer.objects.filter(id__in=all_ids)
+
     for s in servers:
-        s.address = f"{get_local_ipv4()}:{s.port}"  # Add address attribute for display
+        s.address = f"{get_local_ipv4()}:{s.port}"
+        s.is_owner = (s.owner == request.user)
 
     from .services.server_paths import MC_SERVER_HOME
     mc_server_home = MC_SERVER_HOME
 
     return render(request, 'core_APP/dashboard.html', {'servers': servers, 'mc_server_home': mc_server_home})
-
-
-# @login_required
-# def settings_view(request):
-#     """View / update the server home directory."""
-#     settings_obj, _ = UserSettings.objects.get_or_create(user=request.user)
-
-#     if request.method == 'POST':
-#         new_home = request.POST.get('server_home', '').strip()
-#         if new_home:
-#             settings_obj.server_home = new_home
-#             settings_obj.save()
-#             messages.success(request, 'Server home directory updated.')
-#         else:
-#             messages.error(request, 'Path cannot be empty.')
-
-#     return render(request, 'core_APP/settings.html', {'settings': settings_obj})
 
 
 @login_required
@@ -126,6 +131,14 @@ def add_server_view(request):
         name = request.POST.get('name', '').strip()
         mc_version = request.POST.get('mc_version', '').strip()
         mod_loader = request.POST.get('mod_loader', 'vanilla')
+
+        try:
+            memory_gb = int(request.POST.get('memory_gb', 2))
+            if memory_gb < 1 or memory_gb > 64:
+                raise ValueError
+        except (ValueError, TypeError):
+            messages.error(request, 'Memory must be a whole number between 1 and 64 GB.')
+            return redirect('add_server')
 
         if not name or not mc_version:
             messages.error(request, 'Server name and version are required.')
@@ -142,6 +155,7 @@ def add_server_view(request):
                 server_path=str(server_path),
                 port=get_next_port(),
                 status='created',
+                memory_gb=memory_gb,
             )
 
             success, message = create_server_on_disk(server, server_path)
@@ -161,11 +175,7 @@ def add_server_view(request):
 @require_POST
 @login_required
 def start_server_view(request, server_id):
-    server = get_object_or_404(
-        MinecraftServer,
-        id=server_id,
-        owner=request.user,
-    )
+    server = get_accessible_server(request, server_id)
 
     server_path = get_server_path(server.server_uuid)
 
@@ -198,11 +208,7 @@ def start_server_view(request, server_id):
 @require_POST
 @login_required
 def stop_server_view(request, server_id):
-    server = get_object_or_404(
-        MinecraftServer,
-        id=server_id,
-        owner=request.user,
-    )
+    server = get_accessible_server(request, server_id)
 
     server_path = get_server_path(server.server_uuid)
 
@@ -236,11 +242,7 @@ def stop_server_view(request, server_id):
 @login_required
 def edit_server_view(request, server_id):
     """View and edit a specific server's settings."""
-    server = get_object_or_404(
-        MinecraftServer,
-        id=server_id,
-        owner=request.user,
-    )
+    server = get_accessible_server(request, server_id)
 
     server_properties_path = get_server_path(server.server_uuid) / "data" / "server.properties"
     print(server_properties_path)
@@ -277,6 +279,66 @@ def edit_server_view(request, server_id):
     return render(request, 'core_APP/edit_server.html', {
         'server': server,
         'properties': properties,
+        'is_owner': server.owner == request.user,
+    })
+
+
+@login_required
+def manage_access_view(request, server_id):
+    """
+    Owner-only view to grant or revoke access to a server.
+    Shared users receive a 403 Forbidden response.
+    """
+    server = get_object_or_404(MinecraftServer, id=server_id)
+
+    if server.owner != request.user:
+        return HttpResponseForbidden("Only the server owner can manage access.")
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+        user_id = request.POST.get("user_id")
+
+        if not user_id:
+            messages.error(request, "No user selected.")
+            return redirect("manage_access", server_id=server_id)
+
+        target_user = get_object_or_404(User, id=user_id)
+
+        if target_user == request.user:
+            messages.error(request, "You cannot modify access for yourself.")
+            return redirect("manage_access", server_id=server_id)
+
+        if action == "grant":
+            _, created = ServerAccess.objects.get_or_create(
+                server=server,
+                user=target_user,
+                defaults={'granted_by': request.user},
+            )
+            if created:
+                messages.success(request, f"Access granted to {target_user.username}.")
+            else:
+                messages.info(request, f"{target_user.username} already has access.")
+
+        elif action == "revoke":
+            deleted, _ = ServerAccess.objects.filter(server=server, user=target_user).delete()
+            if deleted:
+                messages.success(request, f"Access revoked for {target_user.username}.")
+            else:
+                messages.error(request, f"{target_user.username} did not have access.")
+
+        return redirect("manage_access", server_id=server_id)
+
+    # Build list of currently-granted users
+    access_grants = ServerAccess.objects.filter(server=server).select_related('user', 'granted_by')
+    granted_user_ids = set(ag.user_id for ag in access_grants)
+
+    # All users except the owner and those already granted
+    available_users = User.objects.exclude(id=request.user.id).exclude(id__in=granted_user_ids)
+
+    return render(request, 'core_APP/manage_access.html', {
+        'server': server,
+        'access_grants': access_grants,
+        'available_users': available_users,
     })
 
 
@@ -284,11 +346,7 @@ def edit_server_view(request, server_id):
 def playerdata_view(request, server_id):
     """View player data for a specific server."""
 
-    server = get_object_or_404(
-        MinecraftServer,
-        id=server_id,
-        owner=request.user,
-    )
+    server = get_accessible_server(request, server_id)
 
     if request.method == "POST":
         action = request.POST.get("action")
@@ -581,4 +639,5 @@ def playerdata_view(request, server_id):
         "selected_player": selected_player,
         "inventory_slots": (selected_player["inventory"][9:] + selected_player["inventory"][:9]) if selected_player else [],
         "ender_slots": selected_player["ender"] if selected_player else [],
+        "is_owner": server.owner == request.user,
     })

@@ -12,4 +12,5 @@ urlpatterns = [
     path('dashboard/stop-server/<int:server_id>/', views.stop_server_view, name='stop_server'),
     path('dashboard/edit-server/<int:server_id>/', views.edit_server_view, name='edit_server'),
     path('dashboard/playerdata/<int:server_id>/', views.playerdata_view, name='playerdata'),
+    path('dashboard/server/<int:server_id>/access/', views.manage_access_view, name='manage_access'),
 ]

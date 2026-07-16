@@ -488,3 +488,143 @@ a:hover {
     color: #1a5276;
     font-weight: 600;
 }
+
+/* ── Access Control ──────────────────────────────────────────────────────── */
+
+/* "You" badge in the Created By column */
+.owner-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #222;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    border-radius: 2px;
+}
+
+/* Manage Access link in action buttons */
+.access-btn {
+    display: inline-block;
+    padding: 4px 10px;
+    border: 1px solid #7b3f00;
+    color: #7b3f00;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    text-decoration: none;
+    border-radius: 2px;
+    white-space: nowrap;
+}
+.access-btn:hover {
+    background: #7b3f00;
+    color: #fff;
+    text-decoration: none;
+}
+
+/* Grant / Revoke buttons on manage_access page */
+.grant-btn {
+    padding: 8px 20px;
+    border: 1px solid #1a5276;
+    background: #1a5276;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 4px;
+}
+.grant-btn:hover {
+    background: #154360;
+}
+
+.revoke-btn {
+    padding: 4px 12px;
+    border: 1px solid #c0392b;
+    background: transparent;
+    color: #c0392b;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    cursor: pointer;
+    font-family: inherit;
+}
+.revoke-btn:hover {
+    background: #c0392b;
+    color: #fff;
+}
+
+/* Manage access page layout */
+.access-intro {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 24px;
+    padding: 10px 14px;
+    background: #fef9e7;
+    border: 1px solid #f0e68c;
+}
+
+.access-sections {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.access-grant-card {
+    flex: 0 0 280px;
+}
+.access-grant-card h3,
+.access-list-card h3 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+    color: #333;
+}
+
+.access-list-card {
+    flex: 1;
+}
+
+.no-users-msg {
+    font-size: 13px;
+    color: #888;
+    padding: 12px 0;
+}
+
+/* Field hint below an input */
+.field-hint {
+    font-size: 12px;
+    color: #777;
+    margin-bottom: 18px;
+}
+
+/* form-card number input */
+.form-card input[type="number"] {
+    width: 100%;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    border: 1px solid #bbb;
+    background: #fafafa;
+    font-size: 14px;
+    font-family: inherit;
+}
+.form-card input[type="number"]:focus {
+    outline: 2px solid #555;
+    outline-offset: -2px;
+}
+
+.back-link {
+    font-size: 13px;
+    color: #555;
+    font-weight: 600;
+}
+.back-link:hover {
+    color: #222;
+    text-decoration: none;
+}

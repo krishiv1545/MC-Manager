@@ -18,6 +18,8 @@ def create_server_on_disk(server, server_path):
     try:
         server_path.mkdir(parents=True, exist_ok=True)
 
+        mem = server.memory_gb
+
         compose = dedent(f"""
         services:
           minecraft:
@@ -31,9 +33,13 @@ def create_server_on_disk(server, server_path):
               EULA: "TRUE"
               VERSION: "{server.mc_version}"
               TYPE: "{server.mod_loader.upper()}"
+              MEMORY: "{mem}G"
 
             volumes:
               - "${{SERVER_PATH}}/data:/data"
+
+            mem_limit: {mem}g
+            memswap_limit: {mem}g
 
             restart: unless-stopped
         """).strip()

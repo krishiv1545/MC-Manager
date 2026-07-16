@@ -37,7 +37,7 @@
             <input type="text" id="name" name="name" placeholder="e.g. Survival SMP" required autofocus>
 
             <label for="mc_version">Minecraft Version</label>
-            <input type="text" id="mc_version" name="mc_version" placeholder="e.g. 1.21.11" required>
+            <input type="text" id="mc_version" name="mc_version" placeholder="e.g. 1.21.1" required>
 
             <label for="mod_loader">Mod Loader</label>
             <select id="mod_loader" name="mod_loader">
@@ -45,6 +45,10 @@
                 <option value="{{ value }}">{{ display }}</option>
                 {% endfor %}
             </select>
+
+            <label for="memory_gb">Memory (GB)</label>
+            <input type="number" id="memory_gb" name="memory_gb" value="2" required>
+            <p class="field-hint">RAM allocated to the Minecraft server container.</p>
 
             <button type="submit">Create Server</button>
         </form>
