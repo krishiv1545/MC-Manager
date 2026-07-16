@@ -27,8 +27,7 @@ staticfiles/
 # Secrets
 secrets.json
 
-backend/core_APP/migrations/*.py
-!backend/core_APP/migrations/__init__.py
+# Migrations
 backend/core_APP/migrations/*.pyc
 
 # IDEs
@@ -91,3 +90,6 @@ yarn-error.log*
 
 # Local settings
 local_settings.py
+
+# Temp folder for dev
+temp/

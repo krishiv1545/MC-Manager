@@ -56,11 +56,14 @@ def signup_view(request):
         username = request.POST.get('username', '').strip()
         password = request.POST.get('password', '')
         confirm = request.POST.get('confirm', '')
+        secret_pin = request.POST.get('secretPin', '')
 
         if not username or not password:
             messages.error(request, 'Username and password are required.')
         elif password != confirm:
             messages.error(request, 'Passwords do not match.')
+        elif secret_pin != os.getenv('SECRET_PIN'):
+            messages.error(request, 'Invalid secret pin. You do not have access to create an account.')
         elif User.objects.filter(username=username).exists():
             messages.error(request, 'Username already taken.')
         else:
