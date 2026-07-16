@@ -1,0 +1,12 @@
+# Shell scripts must use Unix line endings
+*.sh text eol=lf
+
+# Dockerfiles should also use LF
+Dockerfile text eol=lf
+
+# Python files can safely use LF too
+*.py text eol=lf
+
+# YAML files
+*.yml text eol=lf
+*.yaml text eol=lf
