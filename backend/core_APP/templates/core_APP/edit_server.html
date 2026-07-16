@@ -18,7 +18,6 @@
     </div>
 </nav>
 
-<form method="post" action="{% url 'edit_server' server.id %}">
 <div class="page" style="padding-bottom: 100px;">
     {% if messages %}
     <ul class="messages">
@@ -30,8 +29,24 @@
 
     <h2>Edit Server Settings for <span class="server-name">{{ server.name }}</span></h2>
 
-    {% if properties %}
-        
+    <div class="form-card" style="margin-bottom: 24px;">
+        <h3 style="margin-bottom: 16px; font-size: 13px; font-weight: 700; text-transform: uppercase; color: #333;">Container Settings</h3>
+        <form method="post" action="{% url 'edit_server' server.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_memory">
+            <label for="memory_gb">Memory (GB)</label>
+            <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <input type="number" id="memory_gb" name="memory_gb" value="{{ server.memory_gb }}" min="1" required style="width: 200px; margin-bottom: 0;">
+                <button type="submit" class="grant-btn" style="margin-top: 0; padding: 7px 16px;">Update Memory</button>
+            </div>
+            <p class="field-hint" style="margin-top: 8px;">RAM allocated to the Minecraft server container.</p>
+        </form>
+    </div>
+
+    <h3 style="margin-bottom: 16px; font-size: 13px; font-weight: 700; text-transform: uppercase; color: #333;">Server Properties</h3>
+    <form method="post" action="{% url 'edit_server' server.id %}">
+        <input type="hidden" name="action" value="update_properties">
+        {% if properties %}
             {% csrf_token %}
             {% for key, value in properties.items %}
                 <div class="property">
@@ -50,12 +65,14 @@
                 </div>
             {% endfor %}
             
-    {% else %}
-        <p>No server properties found.</p>
-    {% endif %}
+        {% else %}
+            <p>No server properties found.</p>
+        {% endif %}
+
+        <div class="submit-footer">
+            <button type="submit" class="save-btn">Save Properties</button>
+        </div>
+    </form>
 </div>
-<div class="submit-footer">
-    <button type="submit" class="save-btn">Save Changes</button>
-</div>
-</form>
 {% endblock %}
+

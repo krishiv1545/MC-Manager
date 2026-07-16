@@ -19,7 +19,7 @@ from django.urls import reverse
 import os
 import socket
 
-from .services.server_creator import create_server_on_disk
+from .services.server_creator import create_server_on_disk, update_compose_memory
 from .services.server_paths import get_server_path, get_host_server_path
 from .services.server_creator import get_next_port
 
@@ -258,23 +258,45 @@ def edit_server_view(request, server_id):
                     properties[key] = value
 
     if request.method == "POST":
-        lines = []
-        with open(server_properties_path, "r") as f:
-            for line in f:
-                if "=" in line and not line.lstrip().startswith("#"):
-                    key, _ = line.rstrip("\n").split("=", 1)
+        action = request.POST.get("action")
 
-                    if key in request.POST:
-                        value = request.POST[key]
-                        line = f"{key}={value}\n"
+        if action == "update_memory":
+            try:
+                memory_gb = int(request.POST.get("memory_gb", 2))
+                if memory_gb < 1 or memory_gb > 64:
+                    raise ValueError
+                server.memory_gb = memory_gb
+                server.save()
+                
+                success, msg = update_compose_memory(get_server_path(server.server_uuid), memory_gb)
+                if success:
+                    messages.success(request, msg)
+                else:
+                    messages.error(request, msg)
+            except (ValueError, TypeError):
+                messages.error(request, "Memory must be a whole number between 1 and 64 GB.")
+            return redirect("edit_server", server.id)
+            
+        elif action == "update_properties" or not action:
+            # Fallback for empty action or update_properties
+            lines = []
+            if server_properties_path.exists():
+                with open(server_properties_path, "r") as f:
+                    for line in f:
+                        if "=" in line and not line.lstrip().startswith("#"):
+                            key, _ = line.rstrip("\n").split("=", 1)
 
-                lines.append(line)
+                            if key in request.POST:
+                                value = request.POST[key]
+                                line = f"{key}={value}\n"
 
-        with open(server_properties_path, "w") as f:
-            f.writelines(lines)
+                        lines.append(line)
 
-        messages.success(request, "Server properties updated.")
-        return redirect("edit_server", server.id)
+                with open(server_properties_path, "w") as f:
+                    f.writelines(lines)
+
+            messages.success(request, "Server properties updated.")
+            return redirect("edit_server", server.id)
 
     return render(request, 'core_APP/edit_server.html', {
         'server': server,

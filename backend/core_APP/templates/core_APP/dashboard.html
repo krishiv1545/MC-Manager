@@ -37,6 +37,7 @@
                 <th>Name</th>
                 <th>Version</th>
                 <th>Mod Loader</th>
+                <th>Mem</th>
                 <th>Address</th>
                 <th>Created By</th>
                 <th>Created</th>
@@ -51,6 +52,7 @@
                 <td>{{ s.name }}</td>
                 <td>{{ s.mc_version }}</td>
                 <td>{{ s.get_mod_loader_display }}</td>
+                <td><span class="memory-badge">{{ s.memory_gb }}G</span></td>
                 <td><span class="server-address" onclick="copyToClipboard(this)" style="cursor: pointer;">{{ s.address }}</span></td>
                 <td>
                     {% if s.is_owner %}
