@@ -508,25 +508,6 @@
     word-break: break-all;
 }
 
-.admin-tags {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-
-.tag {
-    display: inline-block;
-    padding: 2px 8px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    border-radius: 2px;
-}
-.tag--op  { background: #fff3cd; color: #856404; border: 1px solid #ffc107; }
-.tag--wl  { background: #d1e7dd; color: #0a5c36; border: 1px solid #a3cfbb; }
-.tag--ban { background: #f8d7da; color: #842029; border: 1px solid #f1aeb5; }
-
 .admin-bar-right {
     display: flex;
     gap: 8px;
@@ -616,4 +597,4 @@
     color: #333;
     border-radius: 3px;
 }
-.pd-coord:focus { outline: 2px solid #555; outline-offset: -2px; }
+.pd-coord:focus { outline: 2px solid #555; outline-offset: -2px; }

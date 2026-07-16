@@ -54,7 +54,7 @@
                 <a class="player-card {% if player.uuid == selected_player.uuid %}active{% endif %}"
                    href="?player={{ player.uuid }}">
                     <div class="player-name">
-                        {{ player.name }}
+                        {{ player.display_name }}
                     </div>
                     <div class="player-badges">
                         {% if player.is_op %}<span class="pbadge pbadge--op">OP</span>{% endif %}
@@ -79,18 +79,8 @@
             {# ── Admin bar ─────────────────────────────────────────────────── #}
             <section class="panel admin-bar">
                 <div class="admin-bar-left">
+                    <span>{{ selected_player.display_name }}</span>
                     <span class="admin-uuid">{{ selected_player.uuid }}</span>
-                    <div class="admin-tags">
-                        {% if selected_player.is_op %}
-                            <span class="tag tag--op">Operator</span>
-                        {% endif %}
-                        {% if selected_player.is_whitelisted %}
-                            <span class="tag tag--wl">Whitelisted</span>
-                        {% endif %}
-                        {% if selected_player.is_banned %}
-                            <span class="tag tag--ban">Banned</span>
-                        {% endif %}
-                    </div>
                 </div>
                 <div class="admin-bar-right">
                     {# OP / DeOp #}
@@ -146,7 +136,7 @@
                 </div>
             </section>
 
-            {# ── Player Actions ─────────────────────────────────────────── #}
+            {# Player Actions #}
             <section class="panel">
                 <h3>Player Actions</h3>
 

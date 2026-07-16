@@ -400,6 +400,20 @@ def playerdata_view(request, server_id):
     """View player data for a specific server."""
 
     server = get_accessible_server(request, server_id)
+    server_root = get_server_path(server.server_uuid) / "data"
+
+    usercache_json_path = server_root / "usercache.json"
+
+    uuid_to_name = {}
+
+    if usercache_json_path.exists():
+        with open(usercache_json_path, "r") as f:
+            usercache = json.load(f)
+
+        uuid_to_name = {
+            player["uuid"]: player["name"]
+            for player in usercache
+        }
 
     if request.method == "POST":
         action = request.POST.get("action")
@@ -410,7 +424,6 @@ def playerdata_view(request, server_id):
             return redirect(request.path)
 
         player_file = get_server_path(server.server_uuid) / "data" / "world" / "playerdata" / f"{target_uuid}.dat"
-        server_root = get_server_path(server.server_uuid) / "data"
 
         # First, resolve the username for RCON commands
         username = target_uuid
@@ -655,6 +668,7 @@ def playerdata_view(request, server_id):
             players.append({
                 "uuid": file.stem,
                 "name": file.stem,          # Replace later with username lookup
+                "display_name": uuid_to_name.get(file.stem, file.stem),
                 "health": nbt.get("Health", 20),
                 "food": nbt.get("foodLevel", 20),
                 "xp_level": nbt.get("XpLevel", 0),
