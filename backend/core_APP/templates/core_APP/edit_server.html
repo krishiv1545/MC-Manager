@@ -41,6 +41,16 @@
             </div>
             <p class="field-hint" style="margin-top: 8px;">RAM allocated to the Minecraft server container.</p>
         </form>
+
+        <form method="post" action="{% url 'edit_server' server.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_server_name">
+            <label for="server_name">Server Name</label>
+            <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <input type="text" id="server_name" name="server_name" value="{{ server.name }}" required style="width: 200px; margin-bottom: 0;">
+                <button type="submit" class="grant-btn" style="margin-top: 0; padding: 7px 16px;">Update Name</button>
+            </div>
+        </form>
     </div>
 
     <h3 style="margin-bottom: 16px; font-size: 13px; font-weight: 700; text-transform: uppercase; color: #333;">Server Properties</h3>

@@ -276,6 +276,12 @@ def edit_server_view(request, server_id):
             except (ValueError, TypeError):
                 messages.error(request, "Memory must be a whole number between 1 and 64 GB.")
             return redirect("edit_server", server.id)
+
+        elif action == "update_server_name":
+            server.name = request.POST.get("server_name", server.name)
+            server.save()
+            messages.success(request, "Server name updated.")
+            return redirect("edit_server", server.id)
             
         elif action == "update_properties" or not action:
             # Fallback for empty action or update_properties
