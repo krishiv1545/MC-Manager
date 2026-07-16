@@ -1,6 +1,8 @@
 # MC-Manager
 
-MC-Manager is a tool meant to organize a local homeserver for Minecraft. The goal of development has steadily been ease-of-use. It should merely take minutes before you can hop on your own local Minecraft server for no cost aside for your own hardware.
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white) ![Django](https://img.shields.io/badge/Django-092E20?style=flat&logo=django) ![SQLite](https://img.shields.io/badge/SQLite-003B57?style=flat&logo=sqlite&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white) ![Docker Compose](https://img.shields.io/badge/Docker%20Compose-2496ED?style=flat&logo=docker&logoColor=white) ![Minecraft](https://img.shields.io/badge/Minecraft_Server-62B47A?style=flat)
+
+MC-Manager is a web-based tool for managing Minecraft servers on a local home server. It is designed to make self-hosting as simple as possible, allowing you to create and manage Minecraft servers in just a few minutes at no cost other than your own hardware.
 
 ---
 
@@ -17,18 +19,16 @@ MC-Manager is a tool meant to organize a local homeserver for Minecraft. The goa
 
 ## Setup MC-Manager:
 
-We offer a few ways to run MC-Manager. Running via **Docker** is the recommended method because it's the absolute easiest and keeps everything contained safely.
-
 ### Option 1: Running with Docker (Recommended) 🐳
 
-This method is super simple. You just need to have [Docker Desktop](https://www.docker.com/products/docker-desktop/) (or Docker Engine) installed on your computer.
+This is the recommended installation method. It requires Docker Desktop (Windows/macOS) or Docker Engine with Docker Compose (Linux).
 
 1. **Clone or download this repository** to your computer.
    ```bash
    git clone https://github.com/krishiv1545/MC-Manager.git
    ```
 
-2. **Set up your environment variables:**
+2. **Configure environmental variables**
 
    Copy the `.env.example` file and rename it to `.env`.
 
@@ -57,7 +57,7 @@ This method is super simple. You just need to have [Docker Desktop](https://www.
    docker compose down
    ```
 
-4. **Access the Dashboard:**
+5. **Access the Dashboard:**
    Open your browser and go to `http://localhost:8000`. You can now sign up using your secret PIN.
 
 ---
@@ -82,7 +82,7 @@ If you prefer to run the Django application directly on your host machine (note:
    pip install -r requirements.txt
    ```
 
-3. **Configure your `.env` file:**
+3. **Configure environmental variables**
    Copy the `.env.example` file and rename it to `.env`.
 
    For Windows:-
@@ -114,14 +114,10 @@ If you prefer to run the Django application directly on your host machine (note:
 ---
 
 **Q: How to invite friends to manage a server?**  
-A: Once you create a server, you are the "Owner". Click the gold **🔑 Manage Access** button on the dashboard next to your server to grant your friends access. They must have an account on your MC-Manager first.
+A: Once you create a server, you are the "Owner". Click the gold **Manage Access** button on the dashboard next to your server to grant your friends access. They must have an account on your MC-Manager first.
 
 **Q: If MC-Manager works but the Minecraft Server won't start**  
 A: Check if the port (default is 25565) is already in use by another server on your machine, and ensure you have Docker running in the background. Port is displayed on the Dashboard under Address column as IP:PORT (for example 10.249.248.38:25566) where '25566' is the port.
 
 **Q: Where are the server files actually located?**  
 A: They are stored in the directory you specified in the `.env` file (`HOST_MC_SERVER_HOME` for Docker, or `MC_SERVER_HOME` for standard Django). Inside, you'll find a separate folder for each server, complete with a `data/` directory and its own `docker-compose.yml`.
-
----
-
-*Built with ❤️ using Django and Docker.*

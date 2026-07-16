@@ -445,7 +445,7 @@ a:hover {
 .submit-footer {
     position: fixed;
     left: 0;
-    bottom: 0;
+    bottom: 36px;
     width: 100%;
     height: 70px;
 
@@ -455,7 +455,7 @@ a:hover {
 
     background: #fff;
     border-top: 1px solid #ddd;
-    z-index: 1000;
+    z-index: 999;
 }
 
 .save-btn {
@@ -688,4 +688,50 @@ a:hover {
     margin: 0 2px;
     vertical-align: middle;
     flex-shrink: 0;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 36px;
+
+    background: #000;
+    color: #d1d5db;
+
+    text-align: center;
+    padding-inline: 40px;
+
+    border-top: 1px solid #374151;
+    font-size: 0.9rem;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    z-index: 1000;
+}
+
+footer p {
+    margin: 0;
+}
+
+footer a {
+    color: #60a5fa;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+footer a:hover {
+    color: #93c5fd;
+    text-decoration: none;
+}
+
+.star {
+    color: #facc15;
+    font-size: 22px;
+    line-height: 1;
+    display: inline-block;
+    transform: translateY(2px);
 }
