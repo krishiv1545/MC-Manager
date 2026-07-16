@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import JsonResponse, Http404, HttpResponseForbidden
+from django.http import JsonResponse, Http404
 from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
@@ -314,7 +314,8 @@ def manage_access_view(request, server_id):
     server = get_object_or_404(MinecraftServer, id=server_id)
 
     if server.owner != request.user:
-        return HttpResponseForbidden("Only the server owner can manage access.")
+        messages.error(request, "You are not the owner of this server.")
+        return redirect("dashboard")
 
     if request.method == "POST":
         action = request.POST.get("action")
