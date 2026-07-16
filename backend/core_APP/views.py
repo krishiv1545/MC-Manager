@@ -412,58 +412,97 @@ def playerdata_view(request, server_id):
         player_file = get_server_path(server.server_uuid) / "data" / "world" / "playerdata" / f"{target_uuid}.dat"
         server_root = get_server_path(server.server_uuid) / "data"
 
+        # First, resolve the username for RCON commands
+        username = target_uuid
+        usercache_path = server_root / "usercache.json"
+        if usercache_path.exists():
+            try:
+                with open(usercache_path, "r") as f:
+                    cache = json.load(f)
+                    for entry in cache:
+                        if entry.get("uuid") == target_uuid:
+                            username = entry.get("name", target_uuid)
+                            break
+            except:
+                pass
+
+        is_running = server.status == "running"
+        container_name = f"mc_{server.server_uuid.hex[:8]}"
+
+        def run_rcon(cmd_str):
+            if not is_running: return False
+            try:
+                subprocess.run(
+                    ["docker", "exec", container_name, "rcon-cli"] + cmd_str.split(),
+                    check=True, capture_output=True
+                )
+                return True
+            except:
+                return False
+
         try:
             if action in ["kill", "heal", "starve", "feed", "teleport"]:
-                if not player_file.exists():
-                    messages.error(request, "Player data not found.")
-                    return redirect(f"{request.path}?player={target_uuid}")
+                if is_running:
+                    if action == "kill": run_rcon(f"kill {username}")
+                    elif action == "heal": run_rcon(f"effect give {username} minecraft:instant_health 1 100")
+                    elif action == "starve": run_rcon(f"effect give {username} minecraft:hunger 10 100")
+                    elif action == "feed": run_rcon(f"effect give {username} minecraft:saturation 1 100")
+                    elif action == "teleport":
+                        dim = request.POST.get("dimension", "minecraft:overworld")
+                        x = request.POST.get("x", "0")
+                        y = request.POST.get("y", "0")
+                        z = request.POST.get("z", "0")
+                        run_rcon(f"execute in {dim} run tp {username} {x} {y} {z}")
+                    messages.success(request, f"Executed {action} on {username} (live).")
+                else:
+                    if not player_file.exists():
+                        messages.error(request, "Player data not found.")
+                        return redirect(f"{request.path}?player={target_uuid}")
 
-                nbt_file = nbtlib.load(player_file)
-                
-                if action == "kill":
-                    nbt_file["Health"] = nbtlib.tag.Float(0.0)
-                    nbt_file.save()
-                    messages.success(request, f"Killed player.")
-                elif action == "heal":
-                    nbt_file["Health"] = nbtlib.tag.Float(20.0)
-                    nbt_file.save()
-                    messages.success(request, f"Healed player.")
-                elif action == "starve":
-                    nbt_file["foodLevel"] = nbtlib.tag.Int(0)
-                    nbt_file.save()
-                    messages.success(request, f"Starved player.")
-                elif action == "feed":
-                    nbt_file["foodLevel"] = nbtlib.tag.Int(20)
-                    nbt_file.save()
-                    messages.success(request, f"Fed player.")
-                elif action == "teleport":
-                    dim = request.POST.get("dimension", "minecraft:overworld")
-                    try:
-                        x = float(request.POST.get("x", 0))
-                        y = float(request.POST.get("y", 0))
-                        z = float(request.POST.get("z", 0))
-                    except ValueError:
-                        x, y, z = 0.0, 0.0, 0.0
+                    nbt_file = nbtlib.load(player_file)
                     
-                    nbt_file["Dimension"] = nbtlib.tag.String(dim)
-                    nbt_file["Pos"] = nbtlib.tag.List[nbtlib.tag.Double]([nbtlib.tag.Double(x), nbtlib.tag.Double(y), nbtlib.tag.Double(z)])
-                    nbt_file.save()
-                    messages.success(request, f"Teleported player to {x}, {y}, {z} in {dim}.")
+                    if action == "kill":
+                        nbt_file["Health"] = nbtlib.tag.Float(0.0)
+                        nbt_file.save()
+                        messages.success(request, f"Killed player.")
+                    elif action == "heal":
+                        nbt_file["Health"] = nbtlib.tag.Float(20.0)
+                        nbt_file.save()
+                        messages.success(request, f"Healed player.")
+                    elif action == "starve":
+                        nbt_file["foodLevel"] = nbtlib.tag.Int(0)
+                        nbt_file.save()
+                        messages.success(request, f"Starved player.")
+                    elif action == "feed":
+                        nbt_file["foodLevel"] = nbtlib.tag.Int(20)
+                        nbt_file.save()
+                        messages.success(request, f"Fed player.")
+                    elif action == "teleport":
+                        dim = request.POST.get("dimension", "minecraft:overworld")
+                        try:
+                            x = float(request.POST.get("x", 0))
+                            y = float(request.POST.get("y", 0))
+                            z = float(request.POST.get("z", 0))
+                        except ValueError:
+                            x, y, z = 0.0, 0.0, 0.0
+                        
+                        nbt_file["Dimension"] = nbtlib.tag.String(dim)
+                        nbt_file["Pos"] = nbtlib.tag.List[nbtlib.tag.Double]([nbtlib.tag.Double(x), nbtlib.tag.Double(y), nbtlib.tag.Double(z)])
+                        nbt_file.save()
+                        messages.success(request, f"Teleported player to {x}, {y}, {z} in {dim}.")
 
             elif action in ["op", "deop", "whitelist_add", "whitelist_remove", "ban", "unban"]:
-                username = target_uuid
-                usercache_path = server_root / "usercache.json"
-                if usercache_path.exists():
-                    try:
-                        with open(usercache_path, "r") as f:
-                            cache = json.load(f)
-                            for entry in cache:
-                                if entry.get("uuid") == target_uuid:
-                                    username = entry.get("name", target_uuid)
-                                    break
-                    except:
-                        pass
+                if is_running:
+                    if action == "op": run_rcon(f"op {username}")
+                    elif action == "deop": run_rcon(f"deop {username}")
+                    elif action == "whitelist_add": run_rcon(f"whitelist add {username}")
+                    elif action == "whitelist_remove": run_rcon(f"whitelist remove {username}")
+                    elif action == "ban": run_rcon(f"ban {username}")
+                    elif action == "unban": run_rcon(f"pardon {username}")
+                    messages.success(request, f"Executed {action} on {username} (live).")
                 
+                # We also write to the JSON files as a fallback / to keep them in sync
+
                 if action in ["op", "deop"]:
                     ops_path = server_root / "ops.json"
                     ops = []
